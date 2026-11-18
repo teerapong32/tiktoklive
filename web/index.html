@@ -17,6 +17,14 @@ button,input,select,textarea{font:inherit;color:inherit}
 #scene{position:absolute;inset:9cqw 0 38cqw;display:flex;align-items:center;justify-content:center}
 .feed{position:absolute;left:3cqw;right:20cqw;bottom:11cqw;display:flex;flex-direction:column;gap:1.4cqw;z-index:5}
 .cm{background:#0009;border-radius:3cqw;padding:1.2cqw 3cqw;font-size:3.8cqw;animation:in .3s}
+.live-comment{display:flex;align-items:center;gap:2cqw;background:linear-gradient(100deg,#160a2beF,#3a0f3fE8);border:1px solid #ffcf5c99;border-radius:4cqw;padding:2cqw 3cqw;box-shadow:0 0 4cqw #ffb30066;animation:commentFloat .45s ease-out both;max-width:100%;overflow:hidden}
+.live-comment img{width:11cqw;height:11cqw;min-width:11cqw;border-radius:50%;object-fit:cover;border:.6cqw solid var(--gold)}
+.live-comment .fallback{width:11cqw;height:11cqw;min-width:11cqw;border-radius:50%;display:grid;place-items:center;background:#ffcf5c;color:#321;font-size:6cqw}
+.live-comment .words{min-width:0;display:flex;flex-direction:column;gap:.5cqw}
+.live-comment b{font-size:3.8cqw;color:var(--gold);overflow-wrap:anywhere}
+.live-comment span{font-size:3.5cqw;line-height:1.25;overflow-wrap:anywhere;color:#fff}
+@keyframes commentFloat{from{opacity:0;transform:translateX(-8cqw) translateY(4cqw) scale(.92)}to{opacity:1;transform:translateX(0) translateY(0) scale(1)}}
+
 .cm i{font-style:normal;color:var(--gold);font-weight:600;margin-right:1.5cqw}
 .hint{position:absolute;bottom:3cqw;left:0;right:0;text-align:center;font-size:3.6cqw;color:#ffe9b8;z-index:5}
 @keyframes in{from{opacity:0;transform:translateY(8px)}}
@@ -181,17 +189,22 @@ function say(t,force=false){return new Promise(resolve=>{
 })}
 
 /* ---------- คิวคอมเมนต์ ---------- */
-function push(n,m){
-  n=(n||'เพื่อนใจดี').trim().slice(0,20);m=(m||'').trim().slice(0,120);if(!m)return;
-  const f=el('cm','<i>'+esc(n)+'</i>'+esc(m),$('#feed'));
+function push(n,m,avatar=''){
+  n=(n||'เพื่อนใจดี').trim().slice(0,30);m=(m||'').trim().slice(0,120);if(!m)return;
+  const f=document.createElement('div');f.className='live-comment';
+  if(avatar){const photo=img(avatar);f.appendChild(photo)}else{const fallback=document.createElement('div');fallback.className='fallback';fallback.textContent='👤';f.appendChild(fallback)}
+  const words=document.createElement('div');words.className='words';
+  const name=document.createElement('b');name.textContent=n;
+  const message=document.createElement('span');message.textContent=m;
+  words.append(name,message);f.appendChild(words);$('#feed').appendChild(f);
   while($('#feed').children.length>4)$('#feed').firstChild.remove();
-  total++;stat();q.push({n,m});if(q.length>15)q.shift();run();
+  total++;stat();q.push({n,m,avatar});if(q.length>15)q.shift();run();
 }
 async function run(){
   if(busy)return;busy=true;
   while(q.length){const e=q.shift();
     if(e.type==='join'){if($('#joinTts').checked)await say('ยินดีต้อนรับ '+e.n+' เข้าสู่ไลฟ์',true);continue}
-    if(q.length<3)await say(e.n+' พิมพ์ว่า '+e.m);
+    if(q.length<3)await say('คุณ '+e.n+' พูดว่า '+e.m);
     try{await S[T].on(e.n,e.m)}catch(x){console.error(x)}}
   busy=false;
 }
@@ -326,7 +339,7 @@ function liveOn(base){if(liveStarted)return;liveStarted=true;
  const es=new EventSource(base+'/events');
  es.onmessage=e=>{const d=JSON.parse(e.data);
   if(d.type==='member'){st.textContent='🟢 พบผู้เข้าร่วม: '+(d.nick||'ไม่พบชื่อ');pushJoin(d.nick)}
-  else if(d.type==='chat'){AV[d.nick]=d.avatar;push(d.nick,d.text);const l=$('#feed').lastChild;if(d.avatar&&l)l.prepend(img(d.avatar,'av'))}
+  else if(d.type==='chat'){AV[d.nick]=d.avatar;push(d.nick,d.text,d.avatar||'')}
   else if(d.type==='gift'){const c=d.count||1;scores[d.nick]=(scores[d.nick]||0)+5*c;merit+=5*c;stat();hud2();celebrate((d.avatar?'<img class="dav" src="'+encodeURI(d.avatar)+'" referrerpolicy="no-referrer"><br>':'')+'🎁 '+esc(d.nick)+'<br>'+esc(d.name)+(c>1?' ×'+c:''));say('ขอบคุณ '+d.nick+' สำหรับ '+d.name)}
   else if(d.type==='profile'){const p=$('#pf');p.innerHTML='';if(d.avatar)p.appendChild(img(d.avatar));const t=document.createElement('div');const b=document.createElement('b');b.textContent=d.nick;t.appendChild(b);t.append('@'+d.id+(d.followers!=null?' · '+Number(d.followers).toLocaleString()+' ผู้ติดตาม':''));p.appendChild(t);p.classList.remove('hide')}
   else if(d.type==='like')burst(Math.random(),.9,6);
