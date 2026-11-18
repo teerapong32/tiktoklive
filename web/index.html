@@ -15,7 +15,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hud b{font-size:5cqw;font-weight:800;color:var(--gold);text-shadow:0 0 12px #ffb30088}
 .chip{background:#0007;border:1px solid #ffcf5c55;border-radius:99px;padding:.6cqw 3cqw;font-size:3.6cqw}
 #scene{position:absolute;inset:9cqw 0 38cqw;display:flex;align-items:center;justify-content:center}
-.feed{position:absolute;left:3cqw;right:20cqw;bottom:11cqw;display:flex;flex-direction:column;gap:1.4cqw;z-index:5}
+.feed{position:absolute;left:3cqw;right:20cqw;bottom:11cqw;display:flex;flex-direction:column;gap:1.4cqw;z-index:5}\n#joinFeed{position:absolute;top:25cqw;left:3cqw;right:3cqw;z-index:6;display:flex;flex-direction:column;gap:1.5cqw;pointer-events:none}\n.join-card{display:flex;align-items:center;gap:2cqw;max-width:90%;width:max-content;background:linear-gradient(100deg,#123d2cF2,#14533be8);border:1px solid #3ddc97;border-radius:4cqw;padding:2cqw 3cqw;box-shadow:0 0 4cqw #3ddc9770;animation:commentFloat .45s ease-out both}\n.join-card img,.join-card .fallback{width:10cqw;height:10cqw;min-width:10cqw;border-radius:50%;object-fit:cover;border:.5cqw solid #3ddc97}\n.join-card .fallback{display:grid;place-items:center;background:#3ddc97;color:#123;font-size:6cqw}\n.join-card b{display:block;color:#9affc8;font-size:4cqw}\n.join-card span{display:block;color:#fff;font-size:3.4cqw}
 .cm{background:#0009;border-radius:3cqw;padding:1.2cqw 3cqw;font-size:3.8cqw;animation:in .3s}
 .live-comment{display:flex;align-items:center;gap:2cqw;background:linear-gradient(100deg,#160a2beF,#3a0f3fE8);border:1px solid #ffcf5c99;border-radius:4cqw;padding:2cqw 3cqw;box-shadow:0 0 4cqw #ffb30066;animation:commentFloat .45s ease-out both;max-width:100%;overflow:hidden}
 .live-comment img{width:11cqw;height:11cqw;min-width:11cqw;border-radius:50%;object-fit:cover;border:.6cqw solid var(--gold)}
@@ -131,7 +131,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 <div class="stage" id="stage">
   <div class="hud"><b id="ttl"></b><span class="chip" id="stat"></span></div>
-  <div id="goal"><span id="glv">Lv.1 · 0/10</span><i><u id="gbar"></u></i></div><div id="lb"></div><div id="pf" class="hide"></div><div id="scene"></div><div id="ban"></div>
+  <div id="goal"><span id="glv">Lv.1 · 0/10</span><i><u id="gbar"></u></i></div><div id="lb"></div><div id="pf" class="hide"></div><div id="joinFeed"></div><div id="scene"></div><div id="ban"></div>
   <div class="feed" id="feed"></div>
   <div class="hint" id="hint"></div>
 </div>
@@ -210,7 +210,7 @@ async function run(){
 }
 function stat(){$('#stat').textContent=T==='wai'?'🪷 บุญรวม '+merit:'💬 '+total+' คอมเมนต์'}
 async function runJoinQueue(){if(joinBusy)return;joinBusy=true;while(joinQ.length){const name=joinQ.shift();if($('#joinTts').checked){const s=$('#joinAudioStatus');if(s)s.textContent='🟡 กำลังเตรียมเสียงทักทาย '+name;await say('ยินดีต้อนรับ '+name+' เข้าสู่ไลฟ์',true);if(s&&s.textContent.startsWith('🟡'))s.textContent='✅ ส่งคำสั่งอ่านชื่อ '+name+' แล้ว'}}joinBusy=false}
-function pushJoin(n){n=(n||'').trim().slice(0,30);if(!n||n==='ผู้ชม'){const s=$('#joinAudioStatus');if(s)s.textContent='⚠️ พบคนเข้าร่วมแต่ข้อมูลชื่อไม่ครบ';return}joinQ.push(n);if(joinQ.length>20)joinQ.shift();const s=$('#joinAudioStatus');if(s)s.textContent='🟢 พบผู้เข้าร่วม '+n+' กำลังเข้าคิวเสียง';runJoinQueue()}
+function pushJoin(n,avatar=''){n=(n||'').trim().slice(0,30);const known=n&&n!=='ผู้ชม';const card=document.createElement('div');card.className='join-card';if(avatar){card.appendChild(img(avatar))}else{const fallback=document.createElement('div');fallback.className='fallback';fallback.textContent='👤';card.appendChild(fallback)}const words=document.createElement('div');const b=document.createElement('b');b.textContent=known?'ยินดีต้อนรับ คุณ'+n:'มีผู้ชมเข้าร่วม LIVE';const line=document.createElement('span');line.textContent=known?'เข้าร่วมไลฟ์แล้ว':'กำลังรับข้อมูลชื่อผู้เข้าร่วม';words.append(b,line);card.appendChild(words);$('#joinFeed').appendChild(card);while($('#joinFeed').children.length>3)$('#joinFeed').firstChild.remove();setTimeout(()=>card.remove(),9000);const s=$('#joinAudioStatus');if(known){joinQ.push(n);if(joinQ.length>20)joinQ.shift();if(s)s.textContent='🟢 พบผู้เข้าร่วม '+n+' กำลังเข้าคิวเสียง';runJoinQueue()}else if(s)s.textContent='⚠️ พบผู้เข้าร่วม แต่ TikTok ไม่ส่งชื่อมาใน event นี้'}
 
 /* ---------- เทมเพลต ---------- */
 const S={};
@@ -314,7 +314,7 @@ function hud2(){const L=1+(total/10|0),p=total%10;
  $('#lb').innerHTML=Object.entries(scores).sort((a,b)=>b[1]-a[1]).slice(0,3).map((e,i)=>'<div>'+['🥇','🥈','🥉'][i]+' '+esc(e[0])+' <b>'+e[1]+'</b></div>').join('');
  if(L>shown){shown=L;celebrate('LEVEL UP!<br>Lv.'+L);say('ยินดีด้วย ไลฟ์เลเวลอัปเป็นเลเวล '+L)}}
 const _push=push;
-push=function(n,m){const b=total;_push(n,m);if(total===b)return;n=(n||'เพื่อนใจดี').trim().slice(0,20);scores[n]=(scores[n]||0)+1;hud2()};
+push=function(n,m,avatar=''){const b=total;_push(n,m,avatar);if(total===b)return;n=(n||'เพื่อนใจดี').trim().slice(0,20);scores[n]=(scores[n]||0)+1;hud2()};
 
 const FX={wai:(n,m)=>{const g=/สาธุ/.test(m);SFX.chime();burst(.5,.4,g?70:35,g)},rum:()=>{SFX.pop();burst(.5,.55,40)},
  tarot:()=>{SFX.flip();setTimeout(()=>{SFX.chime();burst(.5,.42,60,1)},1500)},siam:()=>{SFX.shake();setTimeout(()=>{SFX.chime();burst(.5,.42,60,1)},1500)}};
@@ -338,7 +338,7 @@ function liveOn(base){if(liveStarted)return;liveStarted=true;
  const st=document.createElement('div');st.className='sm';st.id='cst';st.textContent='⚪ ยังไม่เชื่อมต่อ TikTok';$('#panel').prepend(st);
  const es=new EventSource(base+'/events');
  es.onmessage=e=>{const d=JSON.parse(e.data);
-  if(d.type==='member'){st.textContent='🟢 พบผู้เข้าร่วม: '+(d.nick||'ไม่พบชื่อ');pushJoin(d.nick)}
+  if(d.type==='member'){st.textContent='🟢 พบผู้เข้าร่วม: '+(d.nick||'ไม่พบชื่อ');pushJoin(d.nick,d.avatar||'')}
   else if(d.type==='chat'){AV[d.nick]=d.avatar;push(d.nick,d.text,d.avatar||'')}
   else if(d.type==='gift'){const c=d.count||1;scores[d.nick]=(scores[d.nick]||0)+5*c;merit+=5*c;stat();hud2();celebrate((d.avatar?'<img class="dav" src="'+encodeURI(d.avatar)+'" referrerpolicy="no-referrer"><br>':'')+'🎁 '+esc(d.nick)+'<br>'+esc(d.name)+(c>1?' ×'+c:''));say('ขอบคุณ '+d.nick+' สำหรับ '+d.name)}
   else if(d.type==='profile'){const p=$('#pf');p.innerHTML='';if(d.avatar)p.appendChild(img(d.avatar));const t=document.createElement('div');const b=document.createElement('b');b.textContent=d.nick;t.appendChild(b);t.append('@'+d.id+(d.followers!=null?' · '+Number(d.followers).toLocaleString()+' ผู้ติดตาม':''));p.appendChild(t);p.classList.remove('hide')}
