@@ -159,8 +159,8 @@ const INFO={
 };
 
 /* ---------- เสียงอ่านภาษาไทย ---------- */
-function say(t){return new Promise(r=>{
-  if(!$('#tts').checked||!window.speechSynthesis)return setTimeout(r,Math.min(2200,t.length*60));
+function say(t,force=false){return new Promise(r=>{
+  if((!force&&!$('#tts').checked)||!window.speechSynthesis)return setTimeout(r,Math.min(2200,t.length*60));
   const u=new SpeechSynthesisUtterance(t);u.lang='th-TH';
   const v=speechSynthesis.getVoices().find(v=>v.lang.replace('_','-').startsWith('th'));if(v)u.voice=v;
   u.rate=+$('#rate').value;let d=0;const f=()=>{if(!d){d=1;r()}};
@@ -177,7 +177,7 @@ function push(n,m){
 async function run(){
   if(busy)return;busy=true;
   while(q.length){const e=q.shift();
-    if(e.type==='join'){if($('#joinTts').checked)await say('ยินดีต้อนรับ '+e.n+' เข้าสู่ไลฟ์');continue}
+    if(e.type==='join'){if($('#joinTts').checked)await say('ยินดีต้อนรับ '+e.n+' เข้าสู่ไลฟ์',true);continue}
     if(q.length<3)await say(e.n+' พิมพ์ว่า '+e.m);
     try{await S[T].on(e.n,e.m)}catch(x){console.error(x)}}
   busy=false;
