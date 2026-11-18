@@ -1,1 +1,0 @@
-{"name":"tiktok-live-mu","version":"1.0.0","private":true,"scripts":{"start":"node server.js"},"dependencies":{"tiktok-live-connector":"latest"}}
