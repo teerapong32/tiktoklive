@@ -12,9 +12,14 @@ const PORT = Number(process.env.PORT || 3000);
 const clients = new Set();
 
 let connection = null;
-let state = { status: 'idle', user: '', msg: '' };
+let state = {
+  status: 'idle',
+  user: '',
+  msg: '',
+  roomId: ''
+};
 
-// ปิด Euler fallback เมื่อไม่ได้ตั้ง API Key
+// ปิด Euler fallback หากไม่ได้ตั้ง API Key
 if (!process.env.SIGN_API_KEY) {
   RoomIdRouteConfig.skipFetchRoomIdFromEulerRoute = true;
   IsLiveRouteConfig.skipFetchRoomIdFromEulerRoute = true;
@@ -22,11 +27,10 @@ if (!process.env.SIGN_API_KEY) {
 
 const allowedOrigins = (
   process.env.ALLOW_ORIGIN || '*'
-).split(',').map(v => v.trim()).filter(Boolean);
+).split(',').map(x => x.trim()).filter(Boolean);
 
 function cors(req, res) {
   const origin = req.headers.origin;
-
   const allow = allowedOrigins.includes('*')
     ? '*'
     : allowedOrigins.includes(origin) ? origin : '';
@@ -59,13 +63,14 @@ function setState(next) {
 }
 
 function errorDetails(err) {
-  const errors = err?.config?.requestErrs;
+  const errors = err?.config?.requestErrs ||
+    err?.errors;
 
   if (Array.isArray(errors) && errors.length) {
-    return errors.map((item, index) => {
+    return errors.map((item, i) => {
       const name = item?.routeId ||
         item?.name ||
-        `source ${index + 1}`;
+        `Source ${i + 1}`;
 
       const cause = item?.error ||
         item?.cause ||
@@ -78,13 +83,6 @@ function errorDetails(err) {
   return err?.message || String(err);
 }
 
-function avatarOf(data) {
-  return data.profilePictureUrl ||
-    data.user?.profilePictureUrl ||
-    data.user?.profilePicture?.urls?.[0] ||
-    '';
-}
-
 function nickOf(data) {
   return data.nickname ||
     data.user?.nickname ||
@@ -93,22 +91,32 @@ function nickOf(data) {
     'ผู้ชม';
 }
 
-async function connectTikTok(user) {
+function avatarOf(data) {
+  return data.profilePictureUrl ||
+    data.user?.profilePictureUrl ||
+    data.user?.profilePicture?.urls?.[0] ||
+    '';
+}
+
+async function connectTikTok(user, roomId = '') {
   if (connection) {
     const old = connection;
     connection = null;
 
     try {
       await old.disconnect();
-    } catch (err) {
-      console.warn('Disconnect error:', err.message);
+    } catch (e) {
+      console.warn('Disconnect:', e.message);
     }
   }
 
   setState({
     status: 'connecting',
     user,
-    msg: ''
+    roomId,
+    msg: roomId
+      ? 'กำลังเชื่อมต่อด้วย Room ID โดยตรง'
+      : 'กำลังค้นหา Room ID จาก TikTok'
   });
 
   const options = {};
@@ -155,32 +163,41 @@ async function connectTikTok(user) {
     if (connection === current) {
       setState({
         status: 'disconnected',
-        user
+        user,
+        msg: 'การเชื่อมต่อถูกตัด'
       });
     }
   });
 
   current.on(ControlEvent.ERROR, err => {
-    console.error('TikTok connection error:', err);
+    console.error('TikTok error:', err);
 
     if (connection === current) {
       setState({
         status: 'error',
         user,
-        msg: errorDetails(err).slice(0, 500)
+        msg: errorDetails(err).slice(0, 700)
       });
     }
   });
 
   try {
-    const result = await current.connect();
+    // หากมี Room ID จะข้ามขั้นตอนค้นหา Room ID
+    const result = roomId
+      ? await current.connect(roomId)
+      : await current.connect();
 
     if (connection !== current) return;
+
+    const actualRoomId = current.roomId ||
+      roomId ||
+      '';
 
     setState({
       status: 'connected',
       user,
-      msg: ''
+      roomId: actualRoomId,
+      msg: 'เชื่อมต่อสำเร็จ'
     });
 
     const room = current.roomInfo ||
@@ -200,20 +217,19 @@ async function connectTikTok(user) {
       followers: owner.follow_info?.follower_count
     });
 
+    console.log('Connected:', user, actualRoomId);
+
   } catch (err) {
     const detail = errorDetails(err);
 
-    console.error(
-      'TikTok connect failed:',
-      detail,
-      err?.stack || ''
-    );
+    console.error('TikTok connection failed:', detail);
 
     if (connection === current) {
       setState({
         status: 'error',
         user,
-        msg: detail.slice(0, 500)
+        roomId,
+        msg: detail.slice(0, 700)
       });
     }
   }
@@ -222,10 +238,7 @@ async function connectTikTok(user) {
 const server = http.createServer((req, res) => {
   cors(req, res);
 
-  const url = new URL(
-    req.url,
-    'http://localhost'
-  );
+  const url = new URL(req.url, 'http://localhost');
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
@@ -243,7 +256,9 @@ const server = http.createServer((req, res) => {
     return res.end(JSON.stringify({
       ok: true,
       service: 'TikTok LIVE backend',
-      status: state.status
+      status: state.status,
+      user: state.user,
+      roomId: state.roomId
     }));
   }
 
@@ -259,12 +274,10 @@ const server = http.createServer((req, res) => {
 
     clients.add(res);
 
-    res.write(
-      `data: ${JSON.stringify({
-        type: 'status',
-        ...state
-      })}\n\n`
-    );
+    res.write(`data: ${JSON.stringify({
+      type: 'status',
+      ...state
+    })}\n\n`);
 
     req.on('close', () => {
       clients.delete(res);
@@ -278,6 +291,13 @@ const server = http.createServer((req, res) => {
       url.searchParams.get('user') || ''
     ).trim().replace(/^@/, '');
 
+    // รับ Room ID จาก URL หรือ Environment Variable
+    const roomId = (
+      url.searchParams.get('roomId') ||
+      process.env.TIKTOK_ROOM_ID ||
+      ''
+    ).trim();
+
     if (!/^[\w.]{1,40}$/.test(user)) {
       res.writeHead(400, {
         'Content-Type': 'application/json; charset=utf-8'
@@ -285,7 +305,18 @@ const server = http.createServer((req, res) => {
 
       return res.end(JSON.stringify({
         ok: false,
-        error: 'กรุณาระบุชื่อ TikTok ให้ถูกต้อง'
+        error: 'ชื่อ TikTok ไม่ถูกต้อง'
+      }));
+    }
+
+    if (roomId && !/^\d+$/.test(roomId)) {
+      res.writeHead(400, {
+        'Content-Type': 'application/json; charset=utf-8'
+      });
+
+      return res.end(JSON.stringify({
+        ok: false,
+        error: 'Room ID ต้องเป็นตัวเลขเท่านั้น'
       }));
     }
 
@@ -296,10 +327,11 @@ const server = http.createServer((req, res) => {
     res.end(JSON.stringify({
       ok: true,
       status: 'connecting',
-      user
+      user,
+      roomId: roomId || null
     }));
 
-    void connectTikTok(user);
+    void connectTikTok(user, roomId);
 
     return;
   }
@@ -323,7 +355,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(
-    `TikTok LIVE backend listening on port ${PORT}`
-  );
+  console.log(`TikTok LIVE backend listening on ${PORT}`);
 });
