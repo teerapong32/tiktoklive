@@ -131,6 +131,14 @@ async function connectTikTok(user, roomId = '') {
   const current = new TikTokLiveConnection(user, options);
   connection = current;
 
+  current.on(WebcastEvent.MEMBER, data => {
+    send('member', {
+      nick: nickOf(data),
+      avatar: avatarOf(data),
+      memberCount: data.memberCount
+    });
+  });
+
   current.on(WebcastEvent.CHAT, data => {
     send('chat', {
       nick: nickOf(data),
