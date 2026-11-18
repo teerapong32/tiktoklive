@@ -149,7 +149,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 const $=s=>document.querySelector(s),sleep=ms=>new Promise(r=>setTimeout(r,ms)),pick=a=>a[Math.random()*a.length|0];
 const el=(c,h,p)=>{const d=document.createElement('div');d.className=c;if(h!=null)d.innerHTML=h;(p||$('#scene')).appendChild(d);return d};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let T='wai',user='@live',q=[],busy=false,merit=0,total=0,tok=0;
+let T='wai',user='@live',q=[],busy=false,joinQ=[],joinBusy=false,merit=0,total=0,tok=0;
 
 const INFO={
  wai:['🙏 ไหว้พระสายมู','พิมพ์ขอพร หรือพิมพ์ "สาธุ" เพื่อสะสมบุญ'],
@@ -183,7 +183,8 @@ async function run(){
   busy=false;
 }
 function stat(){$('#stat').textContent=T==='wai'?'🪷 บุญรวม '+merit:'💬 '+total+' คอมเมนต์'}
-function pushJoin(n){n=(n||'ผู้ชม').trim().slice(0,30);if(!n)return;q.push({type:'join',n});if(q.length>30)q.shift();run()}
+async function runJoinQueue(){if(joinBusy)return;joinBusy=true;while(joinQ.length){const name=joinQ.shift();if($('#joinTts').checked)await say('ยินดีต้อนรับ '+name+' เข้าสู่ไลฟ์',true)}joinBusy=false}
+function pushJoin(n){n=(n||'').trim().slice(0,30);if(!n)return;joinQ.push(n);if(joinQ.length>20)joinQ.shift();runJoinQueue()}
 
 /* ---------- เทมเพลต ---------- */
 const S={};
@@ -311,7 +312,7 @@ function liveOn(base){if(liveStarted)return;liveStarted=true;
  const st=document.createElement('div');st.className='sm';st.id='cst';st.textContent='⚪ ยังไม่เชื่อมต่อ TikTok';$('#panel').prepend(st);
  const es=new EventSource(base+'/events');
  es.onmessage=e=>{const d=JSON.parse(e.data);
-  if(d.type==='member'){pushJoin(d.nick)}
+  if(d.type==='member'){st.textContent='🟢 พบผู้เข้าร่วม: '+(d.nick||'ไม่พบชื่อ');pushJoin(d.nick)}
   else if(d.type==='chat'){AV[d.nick]=d.avatar;push(d.nick,d.text);const l=$('#feed').lastChild;if(d.avatar&&l)l.prepend(img(d.avatar,'av'))}
   else if(d.type==='gift'){const c=d.count||1;scores[d.nick]=(scores[d.nick]||0)+5*c;merit+=5*c;stat();hud2();celebrate((d.avatar?'<img class="dav" src="'+encodeURI(d.avatar)+'" referrerpolicy="no-referrer"><br>':'')+'🎁 '+esc(d.nick)+'<br>'+esc(d.name)+(c>1?' ×'+c:''));say('ขอบคุณ '+d.nick+' สำหรับ '+d.name)}
   else if(d.type==='profile'){const p=$('#pf');p.innerHTML='';if(d.avatar)p.appendChild(img(d.avatar));const t=document.createElement('div');const b=document.createElement('b');b.textContent=d.nick;t.appendChild(b);t.append('@'+d.id+(d.followers!=null?' · '+Number(d.followers).toLocaleString()+' ผู้ติดตาม':''));p.appendChild(t);p.classList.remove('hide')}
