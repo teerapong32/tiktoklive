@@ -137,8 +137,16 @@ async function connectTikTok(user, roomId = '') {
   connection = current;
 
   current.on(WebcastEvent.MEMBER, data => {
+    const nick = nickOf(data);
+    console.log('TikTok MEMBER event:', JSON.stringify({
+      nick,
+      user: data?.user,
+      uniqueId: data?.uniqueId,
+      nickname: data?.nickname,
+      memberCount: data?.memberCount
+    }));
     send('member', {
-      nick: nickOf(data),
+      nick,
       avatar: avatarOf(data),
       memberCount: data.memberCount
     });
