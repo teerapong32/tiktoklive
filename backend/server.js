@@ -93,6 +93,9 @@ function nickOf(data) {
 
 function avatarOf(data) {
   return data.profilePictureUrl ||
+    data.profilePicture?.urls?.[0] ||
+    data.avatar_thumb?.url_list?.[0] ||
+    data.avatarThumb?.urlList?.[0] ||
     data.user?.profilePictureUrl ||
     data.user?.profilePicture?.urls?.[0] ||
     '';
@@ -209,12 +212,15 @@ async function connectTikTok(user, roomId = '') {
       {};
 
     send('profile', {
-      nick: owner.nickname || user,
+      nick: owner.nickname || owner.displayName || user,
       id: owner.display_id ||
+        owner.displayId ||
         owner.unique_id ||
+        owner.uniqueId ||
         user,
-      avatar: owner.avatar_thumb?.url_list?.[0] || '',
-      followers: owner.follow_info?.follower_count
+      avatar: avatarOf(owner),
+      followers: owner.follow_info?.follower_count ??
+        owner.followInfo?.followerCount
     });
 
     console.log('Connected:', user, actualRoomId);
