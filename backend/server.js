@@ -85,14 +85,28 @@ function errorDetails(err) {
 
 function nickOf(data) {
   const user = data?.user || data?.member?.user || data?.operator || {};
+  const member = data?.member || {};
   return data?.nickname ||
+    data?.displayName ||
+    data?.display_name ||
+    data?.displayId ||
+    data?.display_id ||
+    data?.uniqueId ||
+    data?.unique_id ||
     user.nickname ||
     user.displayName ||
+    user.display_name ||
     user.displayId ||
+    user.display_id ||
     user.uniqueId ||
-    data?.displayName ||
-    data?.displayId ||
-    data?.uniqueId ||
+    user.unique_id ||
+    member.nickname ||
+    member.displayName ||
+    member.display_name ||
+    member.displayId ||
+    member.display_id ||
+    member.uniqueId ||
+    member.unique_id ||
     'ผู้ชม';
 }
 
@@ -140,9 +154,13 @@ async function connectTikTok(user, roomId = '') {
     const nick = nickOf(data);
     console.log('TikTok MEMBER event:', JSON.stringify({
       nick,
+      topLevelKeys: data && typeof data === 'object' ? Object.keys(data) : [],
+      userKeys: data?.user && typeof data.user === 'object' ? Object.keys(data.user) : [],
+      memberKeys: data?.member && typeof data.member === 'object' ? Object.keys(data.member) : [],
       user: data?.user,
-      uniqueId: data?.uniqueId,
-      nickname: data?.nickname,
+      member: data?.member,
+      uniqueId: data?.uniqueId || data?.unique_id,
+      nickname: data?.nickname || data?.displayName || data?.display_name,
       memberCount: data?.memberCount
     }));
     send('member', {
