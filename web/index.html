@@ -137,7 +137,7 @@ button,input,select,textarea{font:inherit;color:inherit}
   <h3>เทมเพลต</h3>
   <select id="sw"><option value="wai">🙏 ไหว้พระสายมู</option><option value="rum">💃 รำวง</option><option value="tarot">🃏 เสี่ยงไพ่ทำนาย</option><option value="siam">🏺 เซียมซี</option></select>
   <h3>เสียง</h3>
-  <label class="row"><input type="checkbox" id="tts" checked style="width:auto"> อ่านคอมเมนต์ภาษาไทย</label><label class="row"><input type="checkbox" id="sfx" checked style="width:auto"> เสียงเอฟเฟกต์</label><label class="row"><input type="checkbox" id="auto" style="width:auto"> โหมดออโต้ (เล่นเองทุก 12 วิ ไม่ต้องรอคอมเมนต์)</label><button id="tc">ทดสอบเลเวลอัป</button>
+  <label class="row"><input type="checkbox" id="tts" checked style="width:auto"> อ่านคอมเมนต์ภาษาไทย</label><label class="row"><input type="checkbox" id="joinTts" checked style="width:auto"> อ่านชื่อผู้เข้าร่วม LIVE</label><label class="row"><input type="checkbox" id="sfx" checked style="width:auto"> เสียงเอฟเฟกต์</label><label class="row"><input type="checkbox" id="auto" style="width:auto"> โหมดออโต้ (เล่นเองทุก 12 วิ ไม่ต้องรอคอมเมนต์)</label><button id="tc">ทดสอบเลเวลอัป</button>
   <div class="row sm">ความเร็วอ่าน <input type="range" id="rate" min=".7" max="1.5" step=".1" value="1.1"></div>
   <div class="row sm">เพลง <input type="range" id="vol" min="0" max="100" value="30"></div>
   <div class="row"><input id="y1" value="https://youtu.be/qjr6gK_a7YI?si=VeETw6YYIeCNTneW" placeholder="ลิงก์ YouTube"><button id="yb">เล่น</button></div>
@@ -177,11 +177,13 @@ function push(n,m){
 async function run(){
   if(busy)return;busy=true;
   while(q.length){const e=q.shift();
+    if(e.type==='join'){if($('#joinTts').checked)await say('ยินดีต้อนรับ '+e.n+' เข้าสู่ไลฟ์');continue}
     if(q.length<3)await say(e.n+' พิมพ์ว่า '+e.m);
     try{await S[T].on(e.n,e.m)}catch(x){console.error(x)}}
   busy=false;
 }
 function stat(){$('#stat').textContent=T==='wai'?'🪷 บุญรวม '+merit:'💬 '+total+' คอมเมนต์'}
+function pushJoin(n){n=(n||'ผู้ชม').trim().slice(0,30);if(!n)return;q.push({type:'join',n});if(q.length>30)q.shift();run()}
 
 /* ---------- เทมเพลต ---------- */
 const S={};
@@ -309,7 +311,8 @@ function liveOn(base){if(liveStarted)return;liveStarted=true;
  const st=document.createElement('div');st.className='sm';st.id='cst';st.textContent='⚪ ยังไม่เชื่อมต่อ TikTok';$('#panel').prepend(st);
  const es=new EventSource(base+'/events');
  es.onmessage=e=>{const d=JSON.parse(e.data);
-  if(d.type==='chat'){AV[d.nick]=d.avatar;push(d.nick,d.text);const l=$('#feed').lastChild;if(d.avatar&&l)l.prepend(img(d.avatar,'av'))}
+  if(d.type==='member'){pushJoin(d.nick)}
+  else if(d.type==='chat'){AV[d.nick]=d.avatar;push(d.nick,d.text);const l=$('#feed').lastChild;if(d.avatar&&l)l.prepend(img(d.avatar,'av'))}
   else if(d.type==='gift'){const c=d.count||1;scores[d.nick]=(scores[d.nick]||0)+5*c;merit+=5*c;stat();hud2();celebrate((d.avatar?'<img class="dav" src="'+encodeURI(d.avatar)+'" referrerpolicy="no-referrer"><br>':'')+'🎁 '+esc(d.nick)+'<br>'+esc(d.name)+(c>1?' ×'+c:''));say('ขอบคุณ '+d.nick+' สำหรับ '+d.name)}
   else if(d.type==='profile'){const p=$('#pf');p.innerHTML='';if(d.avatar)p.appendChild(img(d.avatar));const t=document.createElement('div');const b=document.createElement('b');b.textContent=d.nick;t.appendChild(b);t.append('@'+d.id+(d.followers!=null?' · '+Number(d.followers).toLocaleString()+' ผู้ติดตาม':''));p.appendChild(t);p.classList.remove('hide')}
   else if(d.type==='like')burst(Math.random(),.9,6);
