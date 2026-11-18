@@ -137,7 +137,8 @@ button,input,select,textarea{font:inherit;color:inherit}
   <h3>เทมเพลต</h3>
   <select id="sw"><option value="wai">🙏 ไหว้พระสายมู</option><option value="rum">💃 รำวง</option><option value="tarot">🃏 เสี่ยงไพ่ทำนาย</option><option value="siam">🏺 เซียมซี</option></select>
   <h3>เสียง</h3>
-  <label class="row"><input type="checkbox" id="tts" checked style="width:auto"> อ่านคอมเมนต์ภาษาไทย</label><label class="row"><input type="checkbox" id="joinTts" checked style="width:auto"> อ่านชื่อผู้เข้าร่วม LIVE</label><label class="row"><input type="checkbox" id="sfx" checked style="width:auto"> เสียงเอฟเฟกต์</label><label class="row"><input type="checkbox" id="auto" style="width:auto"> โหมดออโต้ (เล่นเองทุก 12 วิ ไม่ต้องรอคอมเมนต์)</label><button id="tc">ทดสอบเลเวลอัป</button>
+  <label class="row"><input type="checkbox" id="tts" checked style="width:auto"> อ่านคอมเมนต์ภาษาไทย</label><label class="row"><input type="checkbox" id="joinTts" checked style="width:auto"> อ่านชื่อผู้เข้าร่วม LIVE</label>
+  <button id="joinTest" type="button">🔊 เปิดเสียงและทดสอบทักทาย</button><div class="sm" id="joinAudioStatus">ยังไม่ได้เปิดใช้งานเสียงทักทาย</div><label class="row"><input type="checkbox" id="sfx" checked style="width:auto"> เสียงเอฟเฟกต์</label><label class="row"><input type="checkbox" id="auto" style="width:auto"> โหมดออโต้ (เล่นเองทุก 12 วิ ไม่ต้องรอคอมเมนต์)</label><button id="tc">ทดสอบเลเวลอัป</button>
   <div class="row sm">ความเร็วอ่าน <input type="range" id="rate" min=".7" max="1.5" step=".1" value="1.1"></div>
   <div class="row sm">เพลง <input type="range" id="vol" min="0" max="100" value="30"></div>
   <div class="row"><input id="y1" value="https://youtu.be/qjr6gK_a7YI?si=VeETw6YYIeCNTneW" placeholder="ลิงก์ YouTube"><button id="yb">เล่น</button></div>
@@ -159,12 +160,24 @@ const INFO={
 };
 
 /* ---------- เสียงอ่านภาษาไทย ---------- */
-function say(t,force=false){return new Promise(r=>{
-  if((!force&&!$('#tts').checked)||!window.speechSynthesis)return setTimeout(r,Math.min(2200,t.length*60));
-  const u=new SpeechSynthesisUtterance(t);u.lang='th-TH';
-  const v=speechSynthesis.getVoices().find(v=>v.lang.replace('_','-').startsWith('th'));if(v)u.voice=v;
-  u.rate=+$('#rate').value;let d=0;const f=()=>{if(!d){d=1;r()}};
-  u.onend=f;u.onerror=f;setTimeout(f,t.length*200+3000);speechSynthesis.speak(u);
+function say(t,force=false){return new Promise(resolve=>{
+  if((!force&&!$('#tts').checked)||!window.speechSynthesis){resolve();return}
+  try{
+    const synth=window.speechSynthesis;
+    const u=new SpeechSynthesisUtterance(t);u.lang='th-TH';
+    const voices=synth.getVoices();
+    const v=voices.find(x=>x.lang&&x.lang.replace('_','-').toLowerCase().startsWith('th'));
+    if(v)u.voice=v;
+    u.rate=+$('#rate').value||1;
+    let done=false;
+    const finish=()=>{if(done)return;done=true;clearTimeout(timer);resolve()};
+    const timer=setTimeout(finish,Math.max(5000,t.length*350));
+    u.onstart=()=>{const s=$('#joinAudioStatus');if(s&&force)s.textContent='🔊 กำลังอ่านเสียงทักทาย'};
+    u.onend=finish;
+    u.onerror=e=>{const s=$('#joinAudioStatus');if(s&&force)s.textContent='⚠️ เบราว์เซอร์ไม่สามารถเล่นเสียงได้: '+(e.error||'speech error');finish()};
+    synth.resume();
+    synth.speak(u);
+  }catch(err){const s=$('#joinAudioStatus');if(s)s.textContent='⚠️ เปิดเสียงไม่สำเร็จ: '+err.message;resolve()}
 })}
 
 /* ---------- คิวคอมเมนต์ ---------- */
@@ -183,8 +196,8 @@ async function run(){
   busy=false;
 }
 function stat(){$('#stat').textContent=T==='wai'?'🪷 บุญรวม '+merit:'💬 '+total+' คอมเมนต์'}
-async function runJoinQueue(){if(joinBusy)return;joinBusy=true;while(joinQ.length){const name=joinQ.shift();if($('#joinTts').checked)await say('ยินดีต้อนรับ '+name+' เข้าสู่ไลฟ์',true)}joinBusy=false}
-function pushJoin(n){n=(n||'').trim().slice(0,30);if(!n)return;joinQ.push(n);if(joinQ.length>20)joinQ.shift();runJoinQueue()}
+async function runJoinQueue(){if(joinBusy)return;joinBusy=true;while(joinQ.length){const name=joinQ.shift();if($('#joinTts').checked){const s=$('#joinAudioStatus');if(s)s.textContent='🟡 กำลังเตรียมเสียงทักทาย '+name;await say('ยินดีต้อนรับ '+name+' เข้าสู่ไลฟ์',true);if(s&&s.textContent.startsWith('🟡'))s.textContent='✅ ส่งคำสั่งอ่านชื่อ '+name+' แล้ว'}}joinBusy=false}
+function pushJoin(n){n=(n||'').trim().slice(0,30);if(!n||n==='ผู้ชม'){const s=$('#joinAudioStatus');if(s)s.textContent='⚠️ พบคนเข้าร่วมแต่ข้อมูลชื่อไม่ครบ';return}joinQ.push(n);if(joinQ.length>20)joinQ.shift();const s=$('#joinAudioStatus');if(s)s.textContent='🟢 พบผู้เข้าร่วม '+n+' กำลังเข้าคิวเสียง';runJoinQueue()}
 
 /* ---------- เทมเพลต ---------- */
 const S={};
@@ -331,6 +344,19 @@ $('#go').addEventListener('click',()=>{const v=$('#srv').value.trim().replace(/\
 function chk(){const v=window.speechSynthesis&&speechSynthesis.getVoices().some(v=>v.lang.replace('_','-').startsWith('th'));$('#chk').textContent=v?'✅ พบเสียงภาษาไทย':'⚠️ ไม่พบเสียงไทยในเครื่องนี้ (จะอ่านไม่ออกเสียง)'}
 if(window.speechSynthesis){speechSynthesis.onvoiceschanged=chk;setTimeout(chk,800)}else $('#chk').textContent='⚠️ เบราว์เซอร์นี้ไม่รองรับเสียงอ่าน';
 $('#vt').onclick=()=>{AC.resume();SFX.chime();say('สวัสดีครับ ทดสอบเสียงอ่านภาษาไทย')};
+$('#joinTest').onclick=()=>{
+  const s=$('#joinAudioStatus');
+  if(!window.speechSynthesis){if(s)s.textContent='⚠️ เบราว์เซอร์นี้ไม่รองรับเสียงอ่าน';return}
+  const synth=window.speechSynthesis;
+  synth.cancel();synth.resume();AC.resume();
+  const u=new SpeechSynthesisUtterance('ทดสอบเสียงทักทายผู้เข้าร่วม ยินดีต้อนรับเข้าสู่ไลฟ์ครับ');
+  u.lang='th-TH';u.rate=+$('#rate').value||1;
+  const v=synth.getVoices().find(x=>x.lang&&x.lang.replace('_','-').toLowerCase().startsWith('th'));if(v)u.voice=v;
+  u.onstart=()=>{if(s)s.textContent='🔊 ได้ยินเสียงทดสอบหรือไม่? ระบบพร้อมอ่านชื่อเมื่อมีผู้เข้าร่วม'};
+  u.onend=()=>{if(s)s.textContent='✅ ทดสอบเสียงเสร็จแล้ว — ต้องเปิดหน้านี้ค้างไว้ด้านหน้าเพื่อให้มือถือเล่นเสียงได้'};
+  u.onerror=e=>{if(s)s.textContent='⚠️ เล่นเสียงไม่ได้: '+(e.error||'speech error')};
+  synth.speak(u);
+};
 </script>
 </body>
 </html>
