@@ -1,0 +1,1 @@
+แพตช์แก้ระบบ TikTok LIVE\n\n1) แทนที่ backend/server.js และ backend/package.json ใน Repository ด้วยไฟล์ในโฟลเดอร์ backend\n2) ทำตาม FRONTEND-PATCH.txt เพื่อแก้ web/index.html\n3) Push เข้า GitHub แล้วให้ Render และ Vercel Deploy ใหม่\n4) ทดสอบโดยเปิด LIVE ผ่านมือถือและใส่ username ในหน้าเว็บ\n\nแพตช์นี้ยังไม่ได้ Deploy และยังต้องทดสอบการเชื่อมต่อ TikTok จริง\n

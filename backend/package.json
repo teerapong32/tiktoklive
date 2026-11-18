@@ -1,14 +1,9 @@
 {
- "name": "tiktok-live-mu",
- "version": "1.0.0",
- "private": true,
- "scripts": {
-  "start": "node server.js"
- },
- "dependencies": {
-  "tiktok-live-connector": "latest"
- },
- "engines": {
-  "node": ">=18"
- }
+  "name": "tiktok-live-mu",
+  "version": "1.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "start": "node server.js" },
+  "dependencies": { "tiktok-live-connector": "2.5.0" },
+  "engines": { "node": ">=20" }
 }

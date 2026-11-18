@@ -1,49 +1,111 @@
-// เซิร์ฟเวอร์ตัวกลาง: รับคอมเมนต์/ของขวัญ/ไลก์จาก TikTok LIVE แล้วส่งต่อให้หน้าเว็บ
-const http=require('http');
-const lib=require('tiktok-live-connector');
-const Conn=lib.WebcastPushConnection||lib.TikTokLiveConnection;
-const EV=lib.WebcastEvent||{};
-const ORIGIN=process.env.ALLOW_ORIGIN||'*'; // ใส่ลิงก์ Vercel ของคุณเพื่อความปลอดภัย
-const PORT=process.env.PORT||3000;
-const clients=new Set();let conn=null,state={status:'idle',user:''};
-const send=(type,data)=>{const m='data: '+JSON.stringify({type,...data})+'\n\n';clients.forEach(r=>r.write(m))};
-const av=d=>d.profilePictureUrl||(d.user&&(d.user.profilePictureUrl||(d.user.profilePicture&&d.user.profilePicture.urls&&d.user.profilePicture.urls[0])))||'';
-const nick=d=>d.nickname||(d.user&&(d.user.nickname||d.user.uniqueId))||d.uniqueId||'ผู้ชม';
+import http from 'node:http';
+import { TikTokLiveConnection, WebcastEvent, ControlEvent } from 'tiktok-live-connector';
 
-async function connect(user){
-  if(conn){try{conn.disconnect()}catch(e){}}
-  state={status:'connecting',user};send('status',state);
-  const opt={};if(process.env.SIGN_API_KEY)opt.signApiKey=process.env.SIGN_API_KEY;
-  conn=new Conn(user,opt);
-  conn.on(EV.CHAT||'chat',d=>send('chat',{nick:nick(d),avatar:av(d),text:d.comment||''}));
-  conn.on(EV.GIFT||'gift',d=>{
-    const g=d.giftDetails||d.gift||{};
-    if((d.giftType===1||g.giftType===1)&&!d.repeatEnd)return; // ของขวัญแบบต่อเนื่อง รอจนจบ
-    send('gift',{nick:nick(d),avatar:av(d),name:d.giftName||g.giftName||'ของขวัญ',count:d.repeatCount||1});
-  });
-  conn.on(EV.LIKE||'like',d=>send('like',{nick:nick(d),count:d.likeCount||1}));
-  conn.on(EV.DISCONNECTED||'disconnected',()=>{state={...state,status:'disconnected'};send('status',state)});
-  try{
-    const st=await conn.connect();state={status:'connected',user};
-    const o=(st&&st.roomInfo&&st.roomInfo.owner)||{};
-    send('profile',{nick:o.nickname||user,id:o.display_id||user,avatar:(o.avatar_thumb&&o.avatar_thumb.url_list&&o.avatar_thumb.url_list[0])||'',followers:o.follow_info&&o.follow_info.follower_count});
+const PORT = Number(process.env.PORT || 3000);
+const allowedOrigins = (process.env.ALLOW_ORIGIN || '*').split(',').map(v => v.trim()).filter(Boolean);
+const clients = new Set();
+let connection = null;
+let state = { status: 'idle', user: '' };
+
+function cors(req, res) {
+  const origin = req.headers.origin;
+  const allow = allowedOrigins.includes('*') ? '*' : (allowedOrigins.includes(origin) ? origin : '');
+  if (allow) res.setHeader('Access-Control-Allow-Origin', allow);
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+}
+function send(type, data = {}) {
+  const payload = 'data: ' + JSON.stringify({ type, ...data }) + '\n\n';
+  for (const client of clients) if (!client.destroyed) client.write(payload);
+}
+function setState(next) { state = { ...state, ...next }; send('status', state); }
+const avatarOf = d => d.profilePictureUrl || d.user?.profilePictureUrl || d.user?.profilePicture?.urls?.[0] || '';
+const nickOf = d => d.nickname || d.user?.nickname || d.user?.uniqueId || d.uniqueId || 'ผู้ชม';
+
+async function connectTikTok(user) {
+  if (connection) {
+    const old = connection;
+    connection = null;
+    try { await old.disconnect(); } catch (e) { console.warn('Disconnect previous connection:', e.message); }
   }
-  catch(e){state={status:'error',user,msg:String((e&&e.message)||e).slice(0,120)};console.error(e)}
-  send('status',state);
+  setState({ status: 'connecting', user, msg: '' });
+  const options = {};
+  if (process.env.SIGN_API_KEY) options.signApiKey = process.env.SIGN_API_KEY;
+  const current = new TikTokLiveConnection(user, options);
+  connection = current;
+
+  current.on(WebcastEvent.CHAT, d => send('chat', { nick: nickOf(d), avatar: avatarOf(d), text: d.comment || '' }));
+  current.on(WebcastEvent.GIFT, d => {
+    const gift = d.giftDetails || d.gift || {};
+    if ((d.giftType === 1 || gift.giftType === 1) && !d.repeatEnd) return;
+    send('gift', { nick: nickOf(d), avatar: avatarOf(d), name: d.giftName || gift.giftName || 'ของขวัญ', count: d.repeatCount || 1 });
+  });
+  current.on(WebcastEvent.LIKE, d => send('like', { nick: nickOf(d), count: d.likeCount || 1 }));
+  current.on(ControlEvent.DISCONNECTED, () => {
+    if (connection === current) setState({ status: 'disconnected', user });
+  });
+  current.on(ControlEvent.ERROR, err => {
+    console.error('TikTok connection error:', err);
+    if (connection === current) setState({ status: 'error', user, msg: String(err?.message || err).slice(0, 240) });
+  });
+
+  try {
+    const result = await current.connect();
+    if (connection !== current) return;
+    setState({ status: 'connected', user, msg: '' });
+    const room = current.roomInfo || result?.roomInfo || {};
+    const owner = room.owner || room.ownerInfo || {};
+    send('profile', {
+      nick: owner.nickname || user,
+      id: owner.display_id || owner.unique_id || user,
+      avatar: owner.avatar_thumb?.url_list?.[0] || '',
+      followers: owner.follow_info?.follower_count
+    });
+  } catch (err) {
+    console.error('TikTok connect failed:', err);
+    if (connection === current) setState({ status: 'error', user, msg: String(err?.message || err).slice(0, 240) });
+  }
 }
 
-http.createServer((req,res)=>{
-  const u=new URL(req.url,'http://x');
-  res.setHeader('Access-Control-Allow-Origin',ORIGIN);
-  if(u.pathname==='/events'){
-    res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache',Connection:'keep-alive','Access-Control-Allow-Origin':ORIGIN});
-    res.write('data: '+JSON.stringify({type:'status',...state})+'\n\n');
-    clients.add(res);req.on('close',()=>clients.delete(res));return;
+const server = http.createServer((req, res) => {
+  cors(req, res);
+  const url = new URL(req.url, 'http://localhost');
+  if (req.method === 'OPTIONS') { res.writeHead(204); return res.end(); }
+
+  if (url.pathname === '/' || url.pathname === '/health') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify({ ok: true, service: 'TikTok LIVE backend', status: state.status }));
   }
-  if(u.pathname==='/connect'){
-    const user=(u.searchParams.get('user')||'').replace(/^@/,'');
-    if(!/^[\w.]{1,40}$/.test(user)){res.writeHead(400);return res.end('bad user')}
-    connect(user);res.writeHead(200);return res.end('ok');
+  if (url.pathname === '/events') {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no'
+    });
+    res.write('retry: 3000\n');
+    clients.add(res);
+    res.write('data: ' + JSON.stringify({ type: 'status', ...state }) + '\n\n');
+    req.on('close', () => clients.delete(res));
+    return;
   }
-  res.writeHead(200,{'Content-Type':'text/plain; charset=utf-8'});res.end('TikTok live backend: OK');
-}).listen(PORT,()=>console.log('เปิดเบราว์เซอร์ที่ http://localhost:'+PORT));
+  if (url.pathname === '/connect') {
+    const user = (url.searchParams.get('user') || '').trim().replace(/^@/, '');
+    if (!/^[\w.]{1,40}$/.test(user)) {
+      res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+      return res.end(JSON.stringify({ ok: false, error: 'กรุณาระบุชื่อ TikTok ให้ถูกต้อง' }));
+    }
+    res.writeHead(202, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ ok: true, status: 'connecting', user }));
+    void connectTikTok(user);
+    return;
+  }
+  if (url.pathname === '/status') {
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify(state));
+  }
+  res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+  res.end(JSON.stringify({ ok: false, error: 'Not found' }));
+});
+server.listen(PORT, '0.0.0.0', () => console.log('TikTok LIVE backend listening on port ' + PORT));

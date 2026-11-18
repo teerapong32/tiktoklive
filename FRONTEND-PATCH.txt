@@ -1,0 +1,35 @@
+ใน web/index.html ให้หาโค้ดเดิมในฟังก์ชัน liveOn(base):
+
+  const es=new EventSource(base+'/events');
+
+แล้วหลังบรรทัดนี้ให้เพิ่ม:
+
+  es.onopen=async()=>{
+    try {
+      const r=await fetch(base+'/connect?user='+encodeURIComponent(user));
+      if(!r.ok) {
+        const t=await r.text();
+        st.textContent='🔴 เริ่มเชื่อมต่อไม่สำเร็จ: '+t.slice(0,160);
+      }
+    } catch(err) {
+      st.textContent='🔴 ติดต่อ Backend ไม่ได้: '+(err.message||err);
+    }
+  };
+  es.onerror=()=>{
+    if(!st.textContent.startsWith('🟢') && !st.textContent.startsWith('🔴'))
+      st.textContent='🟠 กำลังเชื่อมต่อเซิร์ฟเวอร์...';
+  };
+
+จากนั้นลบบรรทัดเดิมท้ายฟังก์ชัน liveOn(base) ที่สั่งเชื่อมต่อทันที:
+
+  fetch(base+'/connect?user='+encodeURIComponent(user));
+
+เหตุผล: รอให้ EventSource เชื่อมต่อสำเร็จก่อน จึงค่อยสั่ง Backend เชื่อม TikTok เพื่อไม่ให้สถานะ connecting/connected ถูกส่งหายก่อนหน้าเว็บเริ่มรับข้อมูล
+
+ตั้งค่า Render:
+- Root Directory: backend
+- Build Command: npm install
+- Start Command: npm start
+- ALLOW_ORIGIN: https://tiktoklive-web.vercel.app
+
+หมายเหตุ: ไฟล์แพตช์นี้ยังไม่ได้ Deploy และต้องทดสอบกับบัญชีที่กำลัง LIVE จริงก่อนยืนยันว่าใช้งานได้
