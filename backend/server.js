@@ -84,10 +84,15 @@ function errorDetails(err) {
 }
 
 function nickOf(data) {
-  return data.nickname ||
-    data.user?.nickname ||
-    data.user?.uniqueId ||
-    data.uniqueId ||
+  const user = data?.user || data?.member?.user || data?.operator || {};
+  return data?.nickname ||
+    user.nickname ||
+    user.displayName ||
+    user.displayId ||
+    user.uniqueId ||
+    data?.displayName ||
+    data?.displayId ||
+    data?.uniqueId ||
     'ผู้ชม';
 }
 
