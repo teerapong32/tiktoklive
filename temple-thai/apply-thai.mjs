@@ -904,7 +904,7 @@ server = server.replace(
   const input = String(rawInput || '').trim();
   if (/^\\d{8,}$/.test(input)) return input;
   const candidates = [];
-  if (input) {
+  if (/^https?:\\/\\//i.test(input) || /(?:^|\\.)tiktok\\.com\\//i.test(input)) {
     try {
       const parsed = new URL(input.startsWith('http') ? input : 'https://' + input);
       for (const key of ['room_id', 'roomId', 'roomID']) {
