@@ -83,8 +83,19 @@ function errorDetails(err) {
   return err?.message || String(err);
 }
 
+function userOf(data) {
+  return data?.user ||
+    data?.member?.user ||
+    data?.userInfo ||
+    data?.user_info ||
+    data?.member?.userInfo ||
+    data?.member?.user_info ||
+    data?.operator ||
+    {};
+}
+
 function nickOf(data) {
-  const user = data?.user || data?.member?.user || data?.operator || {};
+  const user = userOf(data);
   const member = data?.member || {};
   return data?.nickname ||
     data?.displayName ||
@@ -110,13 +121,25 @@ function nickOf(data) {
     'ผู้ชม';
 }
 
+function userIdOf(data) {
+  const user = userOf(data);
+  return String(data?.userId || data?.user_id ||
+    user.id || user.userId || user.user_id ||
+    data?.member?.userId || data?.member?.user_id || '');
+}
+
 function avatarOf(data) {
-  return data.profilePictureUrl ||
-    data.profilePicture?.urls?.[0] ||
-    data.avatar_thumb?.url_list?.[0] ||
-    data.avatarThumb?.urlList?.[0] ||
-    data.user?.profilePictureUrl ||
-    data.user?.profilePicture?.urls?.[0] ||
+  const user = userOf(data);
+  return data?.profilePictureUrl ||
+    data?.profilePicture?.urls?.[0] ||
+    data?.profilePicture?.urlList?.[0] ||
+    data?.avatar_thumb?.url_list?.[0] ||
+    data?.avatarThumb?.urlList?.[0] ||
+    user.profilePictureUrl ||
+    user.profilePicture?.urls?.[0] ||
+    user.profilePicture?.urlList?.[0] ||
+    user.avatar_thumb?.url_list?.[0] ||
+    user.avatarThumb?.urlList?.[0] ||
     '';
 }
 
@@ -154,6 +177,7 @@ async function connectTikTok(user, roomId = '') {
     const nick = nickOf(data);
     console.log('TikTok MEMBER event:', JSON.stringify({
       nick,
+      userId: userIdOf(data),
       topLevelKeys: data && typeof data === 'object' ? Object.keys(data) : [],
       userKeys: data?.user && typeof data.user === 'object' ? Object.keys(data.user) : [],
       memberKeys: data?.member && typeof data.member === 'object' ? Object.keys(data.member) : [],
@@ -165,6 +189,8 @@ async function connectTikTok(user, roomId = '') {
     }));
     send('member', {
       nick,
+      userId: userIdOf(data),
+      uniqueId: data?.uniqueId || data?.unique_id || userOf(data)?.uniqueId || userOf(data)?.unique_id || '',
       avatar: avatarOf(data),
       memberCount: data.memberCount
     });
