@@ -862,6 +862,24 @@ for (const file of filesToTranslate) {
   html = html.replaceAll('Noto Serif', 'Noto Sans Thai');
   html = html.replaceAll('maichi', 'th-TH-PremwadeeNeural');
   for (const [from, to] of translations) html = html.replaceAll(from, to);
+  if (file === 'public/admin.html') {
+    html = html.replace(
+      '<input type="text" id="ttUser" placeholder="Nhập @username TikTok đang phát Live..." />',
+      '<input type="text" id="ttUser" placeholder="กรอก @username TikTok ที่กำลัง LIVE..." />'
+    );
+    html = html.replace(
+      '<button class="btn gold" id="btnConn">Kết Nối Live</button>',
+      '<button class="btn gold" id="btnConn">เชื่อมต่อ LIVE</button>'
+    );
+    html = html.replace(
+      '<div class="row">\\n          <input type="text" id="ttsDirectText"',
+      '<div class="row">\\n          <input type="text" id="ttRoomId" inputmode="numeric" placeholder="Room ID (ถ้ามี) เพื่อเชื่อมต่อโดยตรง" />\\n        </div>\\n        <div class="row">\\n          <input type="text" id="ttsDirectText"'
+    );
+    html = html.replace(
+      "const username = document.getElementById('ttUser').value.trim();\\n      sendRpc('live.connect', { username });",
+      "const username = document.getElementById('ttUser').value.trim();\\n      const roomId = document.getElementById('ttRoomId').value.trim();\\n      sendRpc('live.connect', { username, roomId });"
+    );
+  }
   if (file === 'public/index.html') {
     html = html.replace(
       'value="Cầu cho gia đình bình an, tài lộc hanh thông, vạn sự như ý"',
@@ -880,6 +898,22 @@ let css = read('public/css/live.css').replaceAll('Be Vietnam Pro', 'Noto Sans Th
 write('public/css/live.css', css);
 
 let server = read('server.js');
+server = server.replace(
+  'async function connectTikTokLive(usernameOrUrl) {',
+  "async function connectTikTokLive(usernameOrUrl, roomIdOverride = '') {"
+);
+server = server.replace(
+  "  const cleanUser = await resolveTikTokUsername(usernameOrUrl);",
+  "  const cleanUser = await resolveTikTokUsername(usernameOrUrl);\\n  const directRoomId = String(roomIdOverride || '').trim();\\n  if (directRoomId && !/^\\\\d+$/.test(directRoomId)) throw new Error('Room ID ต้องเป็นตัวเลขเท่านั้น');"
+);
+server = server.replace(
+  'const roomState = await connection.connect();',
+  'const roomState = await connection.connect(directRoomId || undefined);'
+);
+server = server.replace(
+  "return await connectTikTokLive(params.username);",
+  "return await connectTikTokLive(params.username, params.roomId);"
+);
 server = server.replace(
   'const commentCooldownMap = new Map();',
   `function formatTikTokError(err) {
