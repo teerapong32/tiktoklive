@@ -1,1 +1,3 @@
-[submodule "temple-source"]\n\tpath = temple-source\n\turl = https://github.com/zane-tv/tiktok-live-temple-rpc.git\n
+[submodule "temple-source"]
+	path = temple-source
+	url = https://github.com/zane-tv/tiktok-live-temple-rpc.git
