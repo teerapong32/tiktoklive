@@ -899,12 +899,14 @@ write('public/css/live.css', css);
 
 let server = read('server.js');
 server = server.replace(
-  'async function connectTikTokLive(usernameOrUrl) {',
-  "async function connectTikTokLive(usernameOrUrl, roomIdOverride = '') {"
-);
-server = server.replace(
-  "  const cleanUser = await resolveTikTokUsername(usernameOrUrl);",
-  "  const cleanUser = await resolveTikTokUsername(usernameOrUrl);\n  const directRoomId = String(roomIdOverride || '').trim();\n  if (directRoomId && !/^\\d+$/.test(directRoomId)) throw new Error('Room ID ต้องเป็นตัวเลขเท่านั้น');"
+  `async function connectTikTokLive(usernameOrUrl) {
+  const cleanUser = await resolveTikTokUsername(usernameOrUrl);`,
+  `async function connectTikTokLive(usernameOrUrl, roomIdOverride = '') {
+  const directRoomId = String(roomIdOverride || '').trim();
+  if (directRoomId && !/^[0-9]+$/.test(directRoomId)) throw new Error('Room ID ต้องเป็นตัวเลขเท่านั้น');
+  const cleanUser = directRoomId
+    ? (String(usernameOrUrl || '').trim().replace(/^@/, '') || 'room_' + directRoomId)
+    : await resolveTikTokUsername(usernameOrUrl);`
 );
 server = server.replace(
   'const roomState = await connection.connect();',
