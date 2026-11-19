@@ -144,7 +144,419 @@ const translations = [
   ["Hương đã thắp:", "ธูปที่ถวายแล้ว:"],
 ];
 
-for (const file of ['public/index.html', 'public/admin.html', 'public/js/live.js', 'public/js/admin.js', 'public/js/audio.js', 'public/js/gift-action-engine.js']) {
+const EXTRA_TRANSLATIONS = [
+  [
+    "Bấm để Thắp Hương Dâng Phật",
+    "กดเพื่อถวายธูปบูชาพระ"
+  ],
+  [
+    "Thỉnh Đại Hồng Chung",
+    "สั่นระฆังธรรม"
+  ],
+  [
+    "Bấm để Thỉnh Đại Hồng Chung",
+    "กดเพื่อสั่นระฆังธรรม"
+  ],
+  [
+    "Bấm để Gõ Mõ Tích Công Đức",
+    "กดเพื่อเคาะไม้สวดมนต์สะสมบุญ"
+  ],
+  [
+    "Bấm để Xin Xăm / Gieo Quẻ",
+    "กดเพื่อเสี่ยงเซียมซี / เสี่ยงทาย"
+  ],
+  [
+    "Thắp hương",
+    "ถวายธูป"
+  ],
+  [
+    "Thắp Hương",
+    "ถวายธูป"
+  ],
+  [
+    "Gõ Mõ",
+    "เคาะไม้สวดมนต์"
+  ],
+  [
+    "Thỉnh Chuông",
+    "สั่นระฆัง"
+  ],
+  [
+    "Xin Xăm",
+    "เสี่ยงเซียมซี"
+  ],
+  [
+    "Dâng hương cầu bình an",
+    "ถวายธูปขอพรให้ปลอดภัย"
+  ],
+  [
+    "Dâng Hoa Sen Vàng",
+    "ถวายดอกบัวทอง"
+  ],
+  [
+    "Cầu phúc & Thả hoa đăng",
+    "ขอพรและปล่อยโคม"
+  ],
+  [
+    "Cầu phúc",
+    "ขอพร"
+  ],
+  [
+    "Thả hoa đăng",
+    "ปล่อยโคม"
+  ],
+  [
+    "Đại Lễ Kim Long Chầu Phật",
+    "พิธีมังกรทองถวายพระพุทธเจ้า"
+  ],
+  [
+    "Công đức vô lượng: Đại Thí Chủ dâng lễ",
+    "บุญกุศลไม่มีประมาณ: ผู้มีจิตศรัทธาถวายเครื่องสักการะ"
+  ],
+  [
+    "Công đức vô lượng",
+    "บุญกุศลไม่มีประมาณ"
+  ],
+  [
+    "Đại Thí Chủ dâng lễ",
+    "ผู้มีจิตศรัทธาถวายเครื่องสักการะ"
+  ],
+  [
+    "Quẻ Số",
+    "เซียมซีหมายเลข"
+  ],
+  [
+    "Nhật Xuất Đông Phương",
+    "ตะวันขึ้นทางทิศบูรพา"
+  ],
+  [
+    "Thí chủ xin quẻ:",
+    "ผู้เสี่ยงเซียมซี:"
+  ],
+  [
+    "Thí Chủ Minh Tâm",
+    "ผู้มีจิตศรัทธา"
+  ],
+  [
+    "Quỳnh_Finn",
+    "ผู้ร่วมทำบุญ"
+  ],
+  [
+    "Cầu cho gia đình bình an, tài lộc hanh thông, vạn sự như ý",
+    "ขอให้ครอบครัวสงบสุข การเงินคล่องตัว และสมปรารถนาทุกประการ"
+  ],
+  [
+    "Cầu gia đạo bình an, tài lộc vượng phát",
+    "ขอให้ครอบครัวสงบสุข การเงินรุ่งเรือง"
+  ],
+  [
+    "Nam mô A Di Đà Phật. Chùa Linh Ứng Online xin kính chào quý thí chủ thập phương.",
+    "นะโม อมิตาภพุทธ วัดหลินอึ๋งออนไลน์ขอต้อนรับผู้มีจิตศรัทธาทุกท่าน"
+  ],
+  [
+    "Thắp 3 Nén Hương",
+    "ถวายธูป 3 ดอก"
+  ],
+  [
+    "Thả Đèn Hoa Đăng",
+    "ปล่อยโคมอธิษฐาน"
+  ],
+  [
+    "Gõ Mõ (+5)",
+    "เคาะไม้สวดมนต์ (+5)"
+  ],
+  [
+    "Thỉnh Chuông Chùa",
+    "สั่นระฆังวัด"
+  ],
+  [
+    "Xin Xăm / Gieo Quẻ",
+    "เสี่ยงเซียมซี / เสี่ยงทาย"
+  ],
+  [
+    "Dâng Hoa Sen Vàng",
+    "ถวายดอกบัวทอง"
+  ],
+  [
+    "Mở Màn Hình OBS 9:16 Sạch (?obs=1)",
+    "เปิดหน้าจอ OBS 9:16 แบบไม่มีแถบควบคุม"
+  ],
+  [
+    "Mở Màn Hình Live Chính",
+    "เปิดหน้าจอไลฟ์หลัก"
+  ],
+  [
+    "Mở Admin Đầy Đủ",
+    "เปิดหน้าผู้ดูแลระบบ"
+  ],
+  [
+    "Điều Khiển Live & RPC",
+    "ควบคุมไลฟ์และ RPC"
+  ],
+  [
+    "Âm Thanh Chùa & Giọng Đọc Khấn",
+    "เสียงวัดและเสียงอ่านคำอธิษฐาน"
+  ],
+  [
+    "Bật Âm Thanh Chùa & Giọng Đọc",
+    "เปิดเสียงวัดและเสียงอ่าน"
+  ],
+  [
+    "Giọng Đọc: BẬT",
+    "เสียงอ่าน: เปิด"
+  ],
+  [
+    "Nhạc Nền: BẬT",
+    "เพลงพื้นหลัง: เปิด"
+  ],
+  [
+    "Hiệu Ứng: BẬT",
+    "เอฟเฟกต์: เปิด"
+  ],
+  [
+    "Âm lượng Nhạc nền",
+    "ระดับเสียงเพลงพื้นหลัง"
+  ],
+  [
+    "Âm lượng Giọng đọc",
+    "ระดับเสียงอ่าน"
+  ],
+  [
+    "Âm lượng Hiệu ứng",
+    "ระดับเสียงเอฟเฟกต์"
+  ],
+  [
+    "Kết Nối PHÒNG TIKTOK LIVE",
+    "เชื่อมต่อห้อง TikTok LIVE"
+  ],
+  [
+    "Nhập @username hoặc link TikTok Live...",
+    "กรอกชื่อบัญชีหรือ URL TikTok LIVE"
+  ],
+  [
+    "Tự động Giả lập Người Xem: TẮT",
+    "จำลองผู้ชมอัตโนมัติ: ปิด"
+  ],
+  [
+    "Kích Hoạt Nghi Thức Tương Tác (RPC)",
+    "เริ่มกิจกรรมโต้ตอบ (RPC)"
+  ],
+  [
+    "Tên người xem / Thí chủ...",
+    "ชื่อผู้ชม / ผู้ร่วมทำบุญ"
+  ],
+  [
+    "Lời cầu nguyện...",
+    "คำอธิษฐาน"
+  ],
+  [
+    "Nhật Ký Tương Tác Gần Nhất",
+    "บันทึกกิจกรรมล่าสุด"
+  ],
+  [
+    "NGHI LỄ",
+    "พิธีกรรม"
+  ],
+  [
+    "CÚNG DƯỜNG",
+    "ถวายเครื่องสักการะ"
+  ],
+  [
+    "SANCTUARY INTERACTION",
+    "กิจกรรมภายในวัด"
+  ],
+  [
+    "TẤM LÒNG THÀNH",
+    "ผู้มีจิตศรัทธา"
+  ],
+  [
+    "THƯỢNG THƯỢNG CÁT",
+    "มหามงคล"
+  ],
+  [
+    "BẢNG ĐIỀU KHIỂN NHANH RPC & GIẢ LẬP TRỰC TIẾP (ẨN KHI ?obs=1)",
+    "แผงควบคุม RPC และจำลองกิจกรรม (ซ่อนเมื่อใช้ ?obs=1)"
+  ],
+  [
+    "BẢNG ĐIỀU KHIỂN CHÙA ONLINE TIKTOK LIVE RPC (BUN.JS + ZEROTTS MAI CHI)",
+    "แผงควบคุมวัดออนไลน์ TikTok LIVE RPC"
+  ],
+  [
+    "Mở Màn Hình OBS 9:16 Sạch",
+    "เปิดหน้าจอ OBS 9:16 แบบไม่มีแถบควบคุม"
+  ],
+  [
+    "Mở Màn Hình Live Chính",
+    "เปิดหน้าจอไลฟ์หลัก"
+  ],
+  [
+    "Nhập @username TikTok đang phát Live...",
+    "กรอกชื่อบัญชี TikTok ที่กำลังถ่ายทอดสด"
+  ],
+  [
+    "Kết Nối Live",
+    "เชื่อมต่อ LIVE"
+  ],
+  [
+    "Đọc thử Giọng Mai Chi",
+    "ทดสอบเสียงภาษาไทย"
+  ],
+  [
+    "Gửi Lệnh Tương Tác JSON-RPC 2.0",
+    "ส่งคำสั่งโต้ตอบ JSON-RPC 2.0"
+  ],
+  [
+    "Giả Lập Bình Luận Người Xem TikTok",
+    "จำลองความคิดเห็นจากผู้ชม TikTok"
+  ],
+  [
+    "Nhập nội dung bình luận TikTok...",
+    "กรอกความคิดเห็น TikTok..."
+  ],
+  [
+    "Gửi Comment",
+    "ส่งความคิดเห็น"
+  ],
+  [
+    "Từ khóa tự động nhận diện:",
+    "คำสำคัญที่ระบบตรวจจับอัตโนมัติ:"
+  ],
+  [
+    "Sẵn sàng nhận lệnh JSON-RPC 2.0",
+    "พร้อมรับคำสั่ง JSON-RPC 2.0"
+  ],
+  [
+    "Hương đã thắp:",
+    "จำนวนธูปที่ถวายแล้ว:"
+  ],
+  [
+    "Tổng Công Đức:",
+    "บุญสะสมทั้งหมด:"
+  ],
+  [
+    "Đang tải trạng thái hệ thống...",
+    "กำลังโหลดสถานะระบบ..."
+  ],
+  [
+    "Đang kết nối",
+    "กำลังเชื่อมต่อ"
+  ],
+  [
+    "Đã kết nối",
+    "เชื่อมต่อแล้ว"
+  ],
+  [
+    "Đã ngắt kết nối",
+    "ตัดการเชื่อมต่อแล้ว"
+  ],
+  [
+    "Vui lòng nhập @username hoặc link TikTok Live cần kết nối",
+    "กรุณากรอกชื่อบัญชีหรือ URL TikTok LIVE ที่ต้องการเชื่อมต่อ"
+  ],
+  [
+    "Không tìm thấy @username hợp lệ từ dữ liệu nhập vào",
+    "ไม่พบชื่อบัญชี TikTok ที่ถูกต้องจากข้อมูลที่กรอก"
+  ],
+  [
+    "Không thể kết nối phòng Live (kiểm tra tài khoản đang phát Live chưa)",
+    "ไม่สามารถเชื่อมต่อ LIVE ได้ (โปรดตรวจสอบว่าบัญชีกำลังถ่ายทอดสดอยู่หรือไม่)"
+  ],
+  [
+    "Thành tâm dâng hương bái Phật, cầu bình an cát tường",
+    "ตั้งจิตถวายธูปบูชาพระ ขอพรให้สงบสุขและเป็นสิริมงคล"
+  ],
+  [
+    "Thỉnh chuông Bát Nhã, phiền não tiêu tan, trí tuệ sáng ngời",
+    "สั่นระฆังปัญญา ขจัดความทุกข์ เพิ่มพูนสติปัญญา"
+  ],
+  [
+    "Cầu cho quốc thái dân an, gia đình mạnh khỏe hạnh phúc",
+    "ขอให้บ้านเมืองสงบสุข ประชาชนร่มเย็น ครอบครัวแข็งแรงมีความสุข"
+  ],
+  [
+    "Lời cầu nguyện của thí chủ",
+    "คำอธิษฐานของผู้ร่วมทำบุญ"
+  ],
+  [
+    "Cảm tạ thí chủ",
+    "ขออนุโมทนาบุญกับ"
+  ],
+  [
+    "Nam mô A Di Đà Phật",
+    "นะโม อมิตาภพุทธ"
+  ],
+  [
+    "Thành tâm dâng",
+    "ตั้งใจถวาย"
+  ],
+  [
+    "lễ vật",
+    "เครื่องสักการะ"
+  ],
+  [
+    "Công đức",
+    "บุญกุศล"
+  ],
+  [
+    "Thí chủ",
+    "ผู้ร่วมทำบุญ"
+  ],
+  [
+    "thí chủ",
+    "ผู้ร่วมทำบุญ"
+  ],
+  [
+    "Bình an",
+    "ความสงบสุข"
+  ],
+  [
+    "Gia đạo",
+    "ครอบครัว"
+  ],
+  [
+    "Tài lộc",
+    "โชคลาภ"
+  ],
+  [
+    "Người xem",
+    "ผู้ชม"
+  ],
+  [
+    "Đã vào Chánh Điện lễ Phật",
+    "เข้าร่วมสักการะพระในพระวิหารแล้ว"
+  ],
+  [
+    "quà chưa rõ tên",
+    "ของขวัญไม่ระบุชื่อ"
+  ],
+  [
+    "Gửi",
+    "ส่ง"
+  ],
+  [
+    "Ngắt",
+    "ตัดการเชื่อมต่อ"
+  ],
+  [
+    "Mở",
+    "เปิด"
+  ],
+  [
+    "Đóng",
+    "ปิด"
+  ]
+];
+translations.push(...EXTRA_TRANSLATIONS);
+
+function collectJsFiles(dir) {
+  if (!fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    return entry.isDirectory() ? collectJsFiles(full) : (entry.isFile() && entry.name.endsWith('.js') ? [path.relative(root, full).split(path.sep).join('/') ] : []);
+  });
+}
+const filesToTranslate = ['public/index.html', 'public/admin.html', ...collectJsFiles(path.join(root, 'public/js'))];
+for (const file of filesToTranslate) {
   let html = fs.existsSync(path.join(root, file)) ? read(file) : null;
   if (html === null) continue;
   html = html.replaceAll('lang="vi"', 'lang="th"');
