@@ -158,7 +158,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 const $=s=>document.querySelector(s),sleep=ms=>new Promise(r=>setTimeout(r,ms)),pick=a=>a[Math.random()*a.length|0];
 const el=(c,h,p)=>{const d=document.createElement('div');d.className=c;if(h!=null)d.innerHTML=h;(p||$('#scene')).appendChild(d);return d};
 const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let T='wai',user='@live',q=[],busy=false,joinQ=[],joinBusy=false,merit=0,total=0,tok=0;
+let T='wai',user='@live',q=[],busy=false,joinQ=[],joinBusy=false,joinSeen=new Map(),merit=0,total=0,tok=0;
 
 const INFO={
  wai:['🙏 ไหว้พระสายมู','พิมพ์ขอพร หรือพิมพ์ "สาธุ" เพื่อสะสมบุญ'],
@@ -209,8 +209,8 @@ async function run(){
   busy=false;
 }
 function stat(){$('#stat').textContent=T==='wai'?'🪷 บุญรวม '+merit:'💬 '+total+' คอมเมนต์'}
-async function runJoinQueue(){if(joinBusy)return;joinBusy=true;while(joinQ.length){const name=joinQ.shift();if($('#joinTts').checked){const s=$('#joinAudioStatus');if(s)s.textContent='🟡 กำลังเตรียมเสียงทักทาย '+name;await say('ยินดีต้อนรับ '+name+' เข้าสู่ไลฟ์',true);if(s&&s.textContent.startsWith('🟡'))s.textContent='✅ ส่งคำสั่งอ่านชื่อ '+name+' แล้ว'}}joinBusy=false}
-function pushJoin(n,avatar=''){n=(n||'').trim().slice(0,30);const known=n&&n!=='ผู้ชม';const card=document.createElement('div');card.className='join-card';if(avatar){card.appendChild(img(avatar))}else{const fallback=document.createElement('div');fallback.className='fallback';fallback.textContent='👤';card.appendChild(fallback)}const words=document.createElement('div');const b=document.createElement('b');b.textContent=known?'ยินดีต้อนรับ คุณ'+n:'มีผู้ชมเข้าร่วม LIVE';const line=document.createElement('span');line.textContent=known?'เข้าร่วมไลฟ์แล้ว':'กำลังรับข้อมูลชื่อผู้เข้าร่วม';words.append(b,line);card.appendChild(words);$('#joinFeed').appendChild(card);while($('#joinFeed').children.length>3)$('#joinFeed').firstChild.remove();setTimeout(()=>card.remove(),9000);const s=$('#joinAudioStatus');if(known){joinQ.push(n);if(joinQ.length>20)joinQ.shift();if(s)s.textContent='🟢 พบผู้เข้าร่วม '+n+' กำลังเข้าคิวเสียง';runJoinQueue()}else if(s)s.textContent='⚠️ พบผู้เข้าร่วม แต่ TikTok ไม่ส่งชื่อมาใน event นี้'}
+async function runJoinQueue(){if(joinBusy)return;joinBusy=true;try{while(joinQ.length){const name=joinQ.shift();if(!$('#joinTts').checked)continue;const s=$('#joinAudioStatus');if(s)s.textContent='🟡 กำลังทักทาย คุณ'+name;await say('ยินดีต้อนรับ คุณ'+name+' เข้าสู่ไลฟ์ครับ',true);if(s&&s.textContent.startsWith('🟡'))s.textContent='✅ อ่านคำทักทาย คุณ'+name+' แล้ว'}}catch(err){const s=$('#joinAudioStatus');if(s)s.textContent='⚠️ ระบบเสียงขัดข้อง: '+err.message}finally{joinBusy=false;if(joinQ.length)runJoinQueue()}}
+function pushJoin(n,avatar='',identity=''){n=(n||'').trim().slice(0,30);const known=n&&n!=='ผู้ชม';const key=String(identity||n||'unknown');const now=Date.now();if(joinSeen.has(key)&&now-joinSeen.get(key)<20000)return;joinSeen.set(key,now);for(const [k,t] of joinSeen)if(now-t>60000)joinSeen.delete(k);const card=document.createElement('div');card.className='join-card';if(avatar){card.appendChild(img(avatar))}else{const fallback=document.createElement('div');fallback.className='fallback';fallback.textContent='👤';card.appendChild(fallback)}const words=document.createElement('div');const b=document.createElement('b');b.textContent=known?'ยินดีต้อนรับ คุณ'+n:'มีผู้ชมเข้าร่วม LIVE';const line=document.createElement('span');line.textContent=known?'เข้าร่วมไลฟ์แล้ว':'กำลังรับข้อมูลชื่อผู้เข้าร่วม';words.append(b,line);card.appendChild(words);$('#joinFeed').appendChild(card);while($('#joinFeed').children.length>3)$('#joinFeed').firstChild.remove();setTimeout(()=>card.remove(),9000);const s=$('#joinAudioStatus');if(known){joinQ.push(n);if(joinQ.length>20)joinQ.shift();if(s)s.textContent='🟢 พบผู้เข้าร่วม '+n+' กำลังเข้าคิวเสียง';try{if(window.SFX&&SFX.chime)SFX.chime()}catch(e){}runJoinQueue()}else if(s)s.textContent='⚠️ พบผู้เข้าร่วม แต่ TikTok ไม่ส่งชื่อมาใน event นี้'}
 
 /* ---------- เทมเพลต ---------- */
 const S={};
@@ -337,8 +337,10 @@ let liveStarted=false;
 function liveOn(base){if(liveStarted)return;liveStarted=true;
  const st=document.createElement('div');st.className='sm';st.id='cst';st.textContent='⚪ ยังไม่เชื่อมต่อ TikTok';$('#panel').prepend(st);
  const es=new EventSource(base+'/events');
+ es.onopen=()=>{st.textContent='🟢 ช่องรับข้อมูล LIVE พร้อมทำงาน'};
+ es.onerror=()=>{st.textContent='🟠 กำลังเชื่อมต่อช่องรับข้อมูล LIVE ใหม่…'};
  es.onmessage=e=>{const d=JSON.parse(e.data);
-  if(d.type==='member'){st.textContent='🟢 พบผู้เข้าร่วม: '+(d.nick||'ไม่พบชื่อ');pushJoin(d.nick,d.avatar||'')}
+  if(d.type==='member'){st.textContent='🟢 พบผู้เข้าร่วม: '+(d.nick||'ไม่พบชื่อ')+(d.memberCount!=null?' · '+d.memberCount+' คน':'');pushJoin(d.nick,d.avatar||'',d.userId||d.uniqueId||d.nick||'')}
   else if(d.type==='chat'){AV[d.nick]=d.avatar;push(d.nick,d.text,d.avatar||'')}
   else if(d.type==='gift'){const c=d.count||1;scores[d.nick]=(scores[d.nick]||0)+5*c;merit+=5*c;stat();hud2();celebrate((d.avatar?'<img class="dav" src="'+encodeURI(d.avatar)+'" referrerpolicy="no-referrer"><br>':'')+'🎁 '+esc(d.nick)+'<br>'+esc(d.name)+(c>1?' ×'+c:''));say('ขอบคุณ '+d.nick+' สำหรับ '+d.name)}
   else if(d.type==='profile'){const p=$('#pf');p.innerHTML='';if(d.avatar)p.appendChild(img(d.avatar));const t=document.createElement('div');const b=document.createElement('b');b.textContent=d.nick;t.appendChild(b);t.append('@'+d.id+(d.followers!=null?' · '+Number(d.followers).toLocaleString()+' ผู้ติดตาม':''));p.appendChild(t);p.classList.remove('hide')}
@@ -366,7 +368,7 @@ $('#joinTest').onclick=()=>{
   u.lang='th-TH';u.rate=+$('#rate').value||1;
   const v=synth.getVoices().find(x=>x.lang&&x.lang.replace('_','-').toLowerCase().startsWith('th'));if(v)u.voice=v;
   u.onstart=()=>{if(s)s.textContent='🔊 ได้ยินเสียงทดสอบหรือไม่? ระบบพร้อมอ่านชื่อเมื่อมีผู้เข้าร่วม'};
-  u.onend=()=>{if(s)s.textContent='✅ ทดสอบเสียงเสร็จแล้ว — ต้องเปิดหน้านี้ค้างไว้ด้านหน้าเพื่อให้มือถือเล่นเสียงได้'};
+  u.onend=()=>{if(s)s.textContent='✅ เสียงพร้อมแล้ว — ระบบจะทักทายเมื่อมีคนเข้าร่วม';if(joinQ.length)runJoinQueue()};
   u.onerror=e=>{if(s)s.textContent='⚠️ เล่นเสียงไม่ได้: '+(e.error||'speech error')};
   synth.speak(u);
 };
