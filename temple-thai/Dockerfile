@@ -6,18 +6,19 @@ RUN apt-get update \
 
 WORKDIR /app
 
-# Fetch the upstream Temple application explicitly; Render does not guarantee
-# that Git submodules are initialized in every build environment.
+# Fetch the upstream Temple application explicitly; Render may not initialize
+# the Git submodule when building this repository.
 RUN git clone --depth 1 https://github.com/zane-tv/tiktok-live-temple-rpc.git /tmp/temple-source \
     && cp -a /tmp/temple-source/. /app/ \
     && rm -rf /tmp/temple-source
 
 COPY temple-thai/ /opt/temple-thai/
 
+# Run the Thai patch with Bun (the base image guarantees Bun, not Node.js).
 RUN bun install --frozen-lockfile \
     && python3 -m venv .venv \
     && .venv/bin/pip install --no-cache-dir edge-tts \
-    && node /opt/temple-thai/apply-thai.mjs /app
+    && bun /opt/temple-thai/apply-thai.mjs /app
 
 ENV NODE_ENV=production
 ENV PORT=10000
