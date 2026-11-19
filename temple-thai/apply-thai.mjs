@@ -858,6 +858,16 @@ for (const file of filesToTranslate) {
   html = html.replaceAll('Noto Serif', 'Noto Sans Thai');
   html = html.replaceAll('maichi', 'th-TH-PremwadeeNeural');
   for (const [from, to] of translations) html = html.replaceAll(from, to);
+  if (file === 'public/index.html') {
+    html = html.replace(
+      'value="Cầu cho gia đình bình an, tài lộc hanh thông, vạn sự như ý"',
+      'value="ขอให้ครอบครัวสงบสุข การเงินคล่องตัว และสมปรารถนาทุกประการ"'
+    );
+    html = html.replace(
+      'placeholder="Lời cầu nguyện..."',
+      'placeholder="คำอธิษฐาน..."'
+    );
+  }
   html = html.replaceAll('zenfacts_vn', 'allaboutitscript');
   write(file, html);
 }
