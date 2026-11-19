@@ -1,0 +1,3 @@
+[submodule "temple-source"]
+	path = temple-source
+	url = https://github.com/zane-tv/tiktok-live-temple-rpc.git
