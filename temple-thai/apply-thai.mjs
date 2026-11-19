@@ -817,6 +817,26 @@ const GREETING_CLEANUP_TRANSLATIONS = [
 ];
 translations.push(...GREETING_CLEANUP_TRANSLATIONS);
 
+
+const GREETING_TOKEN_TRANSLATIONS = [
+  ['xin kính chào quý', 'ขอต้อนรับ'],
+  ['Xin kính chào quý', 'ขอต้อนรับ'],
+  ['kính chào quý', 'ขอต้อนรับ'],
+  ['Kính chào quý', 'ขอต้อนรับ'],
+  ['xin kính chào', 'ขอต้อนรับ'],
+  ['Xin kính chào', 'ขอต้อนรับ'],
+  ['kính chào', 'ขอต้อนรับ'],
+  ['Kính chào', 'ขอต้อนรับ'],
+  ['quý thí chủ', 'ผู้ร่วมทำบุญ'],
+  ['Quý thí chủ', 'ผู้ร่วมทำบุญ'],
+  ['quý', 'ผู้มีจิตศรัทธา'],
+  ['Quý', 'ผู้มีจิตศรัทธา'],
+  ['thập phương', 'จากทั่วสารทิศ'],
+  ['Thập phương', 'จากทั่วสารทิศ'],
+  ['THẬP PHƯƠNG', 'จากทั่วสารทิศ']
+];
+translations.push(...GREETING_TOKEN_TRANSLATIONS);
+
 translations.sort((a, b) => b[0].length - a[0].length);
 
 function collectJsFiles(dir) {
