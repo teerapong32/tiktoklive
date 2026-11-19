@@ -880,6 +880,34 @@ let css = read('public/css/live.css').replaceAll('Be Vietnam Pro', 'Noto Sans Th
 write('public/css/live.css', css);
 
 let server = read('server.js');
+server = server.replace(
+  'const commentCooldownMap = new Map();',
+  `function formatTikTokError(err) {
+    const summarize = (item) => ({
+      name: item?.name || 'Error',
+      message: item?.message || String(item),
+      routeId: item?.config?.routeId || item?.routeId || null,
+      code: item?.code || null,
+      statusCode: item?.response?.statusCode || item?.statusCode || null
+    });
+    const details = summarize(err);
+    const requestErrs = err?.config?.requestErrs;
+    if (Array.isArray(requestErrs)) details.requestErrs = requestErrs.map(summarize);
+    else if (requestErrs) details.requestErrs = summarize(requestErrs);
+    if (err?.cause) details.cause = summarize(err.cause);
+    return JSON.stringify(details);
+  }
+
+  const commentCooldownMap = new Map();`
+);
+server = server.replace(
+  "console.warn('[TikTok Live Warning]', state.tiktok.lastError);",
+  "console.warn('[TikTok Live Warning]', formatTikTokError(err));"
+);
+server = server.replace(
+  "const message = err?.message || 'Không thể kết nối phòng Live (kiểm tra tài khoản đang phát Live chưa)';",
+  "console.error('[TikTok Room ID / Connect Diagnostics]', formatTikTokError(err));\n    const message = err?.message || 'Không thể kết nối phòng Live (kiểm tra tài khoản đang phát Live chưa)';"
+);
 for (const [from, to] of translations) server = server.replaceAll(from, to);
 server = server.replace(
   /const ALLOWED_VI_TEXT_RE = .*?;\nconst ALLOWED_VI_NAME_RE = .*?;\nconst VI_LETTER_RE = .*?;/s,
