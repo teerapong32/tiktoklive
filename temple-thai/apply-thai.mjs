@@ -906,7 +906,7 @@ server = server.replace(
   const candidates = [];
   if (input) {
     try {
-      const parsed = new URL(input.startsWith('http') ? input : `https://${input}`);
+      const parsed = new URL(input.startsWith('http') ? input : 'https://' + input);
       for (const key of ['room_id', 'roomId', 'roomID']) {
         const value = parsed.searchParams.get(key);
         if (value && /^\\d{8,}$/.test(value)) return value;
@@ -916,7 +916,7 @@ server = server.replace(
       candidates.push(parsed.href);
     } catch (_) {}
   }
-  if (username) candidates.push(`https://www.tiktok.com/@${encodeURIComponent(username)}/live`);
+  if (username) candidates.push('https://www.tiktok.com/@' + encodeURIComponent(username) + '/live');
   for (const pageUrl of [...new Set(candidates)]) {
     try {
       const response = await fetch(pageUrl, {
@@ -961,7 +961,7 @@ server = server.replace(
     ? (String(usernameOrUrl || '').trim().replace(/^@/, '') || 'room_' + directRoomId)
     : await resolveTikTokUsername(usernameOrUrl);
   const autoRoomId = directRoomId || await resolveTikTokRoomId(usernameOrUrl, cleanUser);
-  if (autoRoomId) console.log(`[TikTok Room ID] Resolved room ${autoRoomId} for @${cleanUser}`);`
+  if (autoRoomId) console.log('[TikTok Room ID] Resolved room ' + autoRoomId + ' for @' + cleanUser);`
 );
 server = server.replace(
   'const roomState = await connection.connect();',
