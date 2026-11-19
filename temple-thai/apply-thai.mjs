@@ -7,6 +7,8 @@ const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const write = (file, content) => fs.writeFileSync(path.join(root, file), content);
 
 const translations = [
+  ['🔌 4. บันทึก Phản Hồi JSON-RPC 2.0 (`/rpc`)','🔌 4. บันทึกการตอบกลับ JSON-RPC 2.0 (`/rpc`)'],
+  ['Phản Hồi','การตอบกลับ'],
   ['Chùa Linh Ứng Online', 'วัดหลินอึ๋งออนไลน์'],
   ['Bảng Điều Khiển', 'แผงควบคุม'],
   ['Kết Nối Phòng TikTok Live', 'เชื่อมต่อห้อง TikTok LIVE'],
