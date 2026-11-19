@@ -7,6 +7,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const write = (file, content) => fs.writeFileSync(path.join(root, file), content);
 
 const translations = [
+  ['Đại Lễ Kim Long','พิธีมังกรทองถวายพระพุทธเจ้า'],
   ['🔌 4. บันทึก Phản Hồi JSON-RPC 2.0 (`/rpc`)','🔌 4. บันทึกการตอบกลับ JSON-RPC 2.0 (`/rpc`)'],
   ['Phản Hồi','การตอบกลับ'],
   ['Chùa Linh Ứng Online', 'วัดหลินอึ๋งออนไลน์'],
