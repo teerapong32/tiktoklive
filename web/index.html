@@ -89,11 +89,18 @@ button,input,select,textarea{font:inherit;color:inherit}
 .hud b{background:linear-gradient(90deg,#ffcf5c,#fff,#ffcf5c);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 3s linear infinite;filter:drop-shadow(0 0 6px #ffb300aa)}
 @keyframes shine{to{background-position:-200% 0}}
 #cv{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
-#goal{position:absolute;top:11cqw;left:3cqw;right:3cqw;z-index:5;display:flex;gap:2cqw;align-items:center;font-size:3.4cqw;font-weight:600}
-#goal i{flex:1;height:2.6cqw;background:#0008;border-radius:9cqw;overflow:hidden;border:1px solid #ffcf5c66}
+#hud{top:3cqw;left:3cqw;right:3cqw;gap:2cqw;align-items:flex-start}
+.hud b{display:block;max-width:62%;font-size:4.2cqw;line-height:1.15;overflow-wrap:anywhere}
+.hud .chip{flex:none;font-size:2.9cqw;white-space:nowrap;padding:1cqw 2.5cqw}
+#goal{position:absolute;top:13cqw;left:3cqw;right:3cqw;z-index:5;display:flex;gap:2cqw;align-items:center;font-size:3.1cqw;font-weight:600}
+#goal i{flex:1;height:2.4cqw;background:#0008;border-radius:9cqw;overflow:hidden;border:1px solid #ffcf5c66}
 #goal u{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--rose),var(--gold));transition:width .6s;text-decoration:none}
-#lb{position:absolute;top:17cqw;left:3cqw;z-index:5;font-size:3.2cqw;background:#0007;border-radius:3cqw;padding:1cqw 2.5cqw;line-height:1.5}
+#lb{position:absolute;top:22cqw;left:3cqw;max-width:43%;z-index:5;font-size:2.8cqw;background:#0009;border-radius:3cqw;padding:1cqw 2cqw;line-height:1.4}
 #lb:empty{display:none}#lb b{color:var(--gold)}
+#pf{top:22cqw;right:3cqw;max-width:49%;font-size:2.7cqw;padding:1cqw 2cqw;gap:1.2cqw}
+#pf img{width:8cqw;height:8cqw}
+#joinFeed{top:34cqw}
+#scene{inset:37cqw 0 38cqw}
 #ban{position:absolute;left:0;right:0;top:34%;text-align:center;font-size:13cqw;font-weight:800;line-height:1.1;color:#fff;text-shadow:0 0 4cqw var(--gold),0 0 10cqw var(--rose);z-index:8;pointer-events:none;opacity:0}
 #ban.on{animation:ban 2.6s}
 @keyframes ban{0%{opacity:0;transform:scale(.3) rotate(-6deg)}14%{opacity:1;transform:scale(1.15)}28%{transform:scale(1)}85%{opacity:1}100%{opacity:0;transform:scale(1.4)}}
@@ -210,7 +217,7 @@ async function run(){
 }
 function stat(){$('#stat').textContent=T==='wai'?'🪷 บุญรวม '+merit:'💬 '+total+' คอมเมนต์'}
 async function runJoinQueue(){if(joinBusy)return;joinBusy=true;try{while(joinQ.length){const name=joinQ.shift();if(!$('#joinTts').checked)continue;const s=$('#joinAudioStatus');if(s)s.textContent='🟡 กำลังทักทาย คุณ'+name;await say('ยินดีต้อนรับ คุณ'+name+' เข้าสู่ไลฟ์ครับ',true);if(s&&s.textContent.startsWith('🟡'))s.textContent='✅ อ่านคำทักทาย คุณ'+name+' แล้ว'}}catch(err){const s=$('#joinAudioStatus');if(s)s.textContent='⚠️ ระบบเสียงขัดข้อง: '+err.message}finally{joinBusy=false;if(joinQ.length)runJoinQueue()}}
-function pushJoin(n,avatar='',identity=''){n=(n||'').trim().slice(0,30);const known=n&&n!=='ผู้ชม';const key=String(identity||(known?n:'')||('unknown-'+now));const now=Date.now();if(joinSeen.has(key)&&now-joinSeen.get(key)<20000)return;joinSeen.set(key,now);for(const [k,t] of joinSeen)if(now-t>60000)joinSeen.delete(k);const card=document.createElement('div');card.className='join-card';if(avatar){card.appendChild(img(avatar))}else{const fallback=document.createElement('div');fallback.className='fallback';fallback.textContent='👤';card.appendChild(fallback)}const words=document.createElement('div');const b=document.createElement('b');b.textContent=known?'ยินดีต้อนรับ คุณ'+n:'มีผู้ชมเข้าร่วม LIVE';const line=document.createElement('span');line.textContent=known?'เข้าร่วมไลฟ์แล้ว':'กำลังรับข้อมูลชื่อผู้เข้าร่วม';words.append(b,line);card.appendChild(words);$('#joinFeed').appendChild(card);while($('#joinFeed').children.length>3)$('#joinFeed').firstChild.remove();setTimeout(()=>card.remove(),9000);const s=$('#joinAudioStatus');if(known){joinQ.push(n);if(joinQ.length>20)joinQ.shift();if(s)s.textContent='🟢 พบผู้เข้าร่วม '+n+' กำลังเข้าคิวเสียง';try{SFX.chime()}catch(e){}runJoinQueue()}else if(s)s.textContent='⚠️ พบผู้เข้าร่วม แต่ TikTok ไม่ส่งชื่อมาใน event นี้'}
+function pushJoin(n,avatar='',identity=''){n=(n||'').trim().slice(0,30);const now=Date.now();const known=n&&n!=='ผู้ชม';const key=String(identity||(known?n:'')||('unknown-'+now));if(joinSeen.has(key)&&now-joinSeen.get(key)<20000)return;joinSeen.set(key,now);for(const [k,t] of joinSeen)if(now-t>60000)joinSeen.delete(k);const card=document.createElement('div');card.className='join-card';if(avatar){card.appendChild(img(avatar))}else{const fallback=document.createElement('div');fallback.className='fallback';fallback.textContent='👤';card.appendChild(fallback)}const words=document.createElement('div');const b=document.createElement('b');b.textContent=known?'ยินดีต้อนรับ คุณ'+n:'มีผู้ชมเข้าร่วม LIVE';const line=document.createElement('span');line.textContent=known?'เข้าร่วมไลฟ์แล้ว':'กำลังรับข้อมูลชื่อผู้เข้าร่วม';words.append(b,line);card.appendChild(words);$('#joinFeed').appendChild(card);while($('#joinFeed').children.length>3)$('#joinFeed').firstChild.remove();setTimeout(()=>card.remove(),9000);const s=$('#joinAudioStatus');if(known){joinQ.push(n);if(joinQ.length>20)joinQ.shift();if(s)s.textContent='🟢 พบผู้เข้าร่วม '+n+' กำลังเข้าคิวเสียง';try{SFX.chime()}catch(e){}runJoinQueue()}else if(s)s.textContent='⚠️ พบผู้เข้าร่วม แต่ TikTok ไม่ส่งชื่อมาใน event นี้'}
 
 /* ---------- เทมเพลต ---------- */
 const S={};
