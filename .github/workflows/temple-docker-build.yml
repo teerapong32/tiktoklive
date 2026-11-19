@@ -1,0 +1,32 @@
+name: Temple Thai Docker Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "temple-thai/**"
+      - "temple-source"
+      - ".gitmodules"
+      - "render.yaml"
+      - ".github/workflows/temple-docker-build.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "temple-thai/**"
+      - "temple-source"
+      - ".gitmodules"
+      - "render.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository and temple submodule
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build production Docker image
+        run: docker build --pull -f temple-thai/Dockerfile -t tiktok-temple-thai .
