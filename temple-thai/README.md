@@ -24,11 +24,10 @@ git clone --recurse-submodules https://github.com/teerapong32/tiktoklive.git
 cd tiktoklive
 node temple-thai/apply-thai.mjs
 cd temple-source
-npm install
-python3 -m venv .venv
-. .venv/bin/activate
-pip install edge-tts
-npm start
+bun install
+uv venv .venv
+uv pip install --python .venv/bin/python edge-tts
+bun start
 ```
 
 หาก clone repository ไปแล้ว ให้ดึง submodule ก่อน:
