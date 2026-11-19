@@ -547,6 +547,7 @@ const EXTRA_TRANSLATIONS = [
   ]
 ];
 translations.push(...EXTRA_TRANSLATIONS);
+translations.sort((a, b) => b[0].length - a[0].length);
 
 function collectJsFiles(dir) {
   if (!fs.existsSync(dir)) return [];
