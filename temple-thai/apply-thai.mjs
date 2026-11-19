@@ -553,43 +553,43 @@ const EXTRA_TRANSLATIONS = [
 
 const COMPLETE_THAI_TRANSLATIONS = [
   ['Nhật Xuất Đông Phương — Mặt Trời Mọc Phương Đông','ตะวันขึ้นทางทิศบูรพา — แสงอาทิตย์ยามรุ่งอรุณ'],
-  ['Đông phương nhật xuất chiếu Càn Khôn\\nHoa nở đầy cành rạng sắc xuân\\nCông danh tài lộc đều viên mãn\\nGia đạo bình an phúc lộc tồn.','ตะวันขึ้นส่องหล้าทั่วฟ้าไกล\\nดอกไม้บานสะพรั่งรับฤดูใหม่\\nการงานเงินทองสมหวังดังตั้งใจ\\nครอบครัวสุขใจมีโชคและร่มเย็น'],
+  ['Đông phương nhật xuất chiếu Càn Khôn\nHoa nở đầy cành rạng sắc xuân\nCông danh tài lộc đều viên mãn\nGia đạo bình an phúc lộc tồn.','ตะวันขึ้นส่องหล้าทั่วฟ้าไกล\nดอกไม้บานสะพรั่งรับฤดูใหม่\nการงานเงินทองสมหวังดังตั้งใจ\nครอบครัวสุขใจมีโชคและร่มเย็น'],
   ['Mọi sự mưu cầu đều đại cát đại lợi. Công việc hanh thông, quý nhân phù trợ, gia đình hòa thuận ấm êm.','ทุกสิ่งที่มุ่งหวังมีเกณฑ์สมปรารถนา การงานราบรื่น มีผู้ใหญ่เกื้อหนุน ครอบครัวรักใคร่กลมเกลียว'],
   ['Quẻ số 1, Thượng Thượng Cát, Nhật Xuất Đông Phương. Mọi sự mưu cầu đều đại cát đại lợi, công danh tài lộc viên mãn, quý nhân phù trợ.','เซียมซีหมายเลข 1 มหามงคล ตะวันขึ้นทางทิศบูรพา สิ่งที่ปรารถนามีเกณฑ์สำเร็จ การงานและการเงินสมบูรณ์ มีผู้เกื้อหนุน'],
   ['Kim Liên Khai Nở — Sen Vàng Tỏa Ngát','ดอกบัวทองเบ่งบาน — กลิ่นหอมแผ่ไกล'],
-  ['Sen vàng nở rộ giữa hồ trong\\nHương thơm lan tỏa khắp non sông\\nLòng thành thắp nén nhang cầu nguyện\\nTrời Phật chứng tri thỏa ước mong.','ดอกบัวทองเบ่งบานกลางสระใส\\nกลิ่นหอมแผ่ไกลทั่วแดนดิน\\nตั้งจิตถวายธูปอธิษฐาน\\nขอพรสมหวังดังตั้งใจ'],
+  ['Sen vàng nở rộ giữa hồ trong\nHương thơm lan tỏa khắp non sông\nLòng thành thắp nén nhang cầu nguyện\nTrời Phật chứng tri thỏa ước mong.','ดอกบัวทองเบ่งบานกลางสระใส\nกลิ่นหอมแผ่ไกลทั่วแดนดิน\nตั้งจิตถวายธูปอธิษฐาน\nขอพรสมหวังดังตั้งใจ'],
   ['Tâm thiện lành ắt gặp phước báu. Cầu tài đắc tài, cầu bình an đắc bình an, bệnh tật tiêu trừ.','ผู้มีจิตเมตตาย่อมพบสิ่งดี ขอทรัพย์ย่อมมีทรัพย์ ขอความสงบย่อมพบความสงบ โรคภัยค่อยคลี่คลาย'],
   ['Quẻ số 8, Thượng Cát, Kim Liên Khai Nở. Tâm thiện lành ắt gặp phước báu, cầu tài đắc tài, cầu bình an đắc bình an.','เซียมซีหมายเลข 8 มงคล ดอกบัวทองเบ่งบาน ผู้มีจิตดีงามย่อมพบสิ่งดี ปรารถนาทรัพย์มีเกณฑ์สมหวัง ปรารถนาความสงบย่อมพบความสงบ'],
   ['Long Vân Tương Hội — Rồng Mây Gặp Gỡ','มังกรพบเมฆา — โอกาสดีมาถึง'],
-  ['Rồng thiêng gặp hội tầng mây xanh\\nVượt Vũ Môn Quan rạng rỡ danh\\nThí chủ kiên tâm hành thiện đạo\\nPhúc dày lộc vượng khắp gia đình.','มังกรพบเมฆาครามงามสง่า\\nข้ามด่านฟ้าชื่อเสียงเลื่องลือไกล\\nผู้มีศรัทธามั่นทำความดี\\nบุญหนุนนำโชคดีสู่ครอบครัว'],
+  ['Rồng thiêng gặp hội tầng mây xanh\nVượt Vũ Môn Quan rạng rỡ danh\nThí chủ kiên tâm hành thiện đạo\nPhúc dày lộc vượng khắp gia đình.','มังกรพบเมฆาครามงามสง่า\nข้ามด่านฟ้าชื่อเสียงเลื่องลือไกล\nผู้มีศรัทธามั่นทำความดี\nบุญหนุนนำโชคดีสู่ครอบครัว'],
   ['Thời vận đang lên mạnh mẽ. Thi cử đỗ đạt, kinh doanh phát đạt, gặp cơ hội lớn đổi đời.','ดวงชะตากำลังรุ่งเรือง การศึกษาและการงานมีโอกาสก้าวหน้า ธุรกิจพบช่องทางที่ดี'],
   ['Quẻ số 12, Đại Cát, Long Vân Tương Hội. Thời vận đang lên mạnh mẽ, thi cử đỗ đạt, kinh doanh phát đạt.','เซียมซีหมายเลข 12 มหามงคล มังกรพบเมฆา ดวงชะตากำลังรุ่งเรือง มีโอกาสประสบความสำเร็จทั้งการเรียนและการค้า'],
   ['Xuân Phong Đắc Ý — Gió Xuân Thuận Buồm','ลมวสันต์พัดพา — เดินทางราบรื่น'],
-  ['Thuận buồm xuôi gió vượt trùng khơi\\nBến giác bình yên nắng rạng ngời\\nTài lộc dồi dào nhân duyên tốt\\nBốn mùa hưng thịnh rộn niềm vui.','ล่องเรือฝ่าคลื่นลมไปได้ไกล\\nถึงฝั่งปลอดภัยแสงทองส่องสดใส\\nทรัพย์สินเพิ่มพูนพบมิตรที่ดี\\nตลอดสี่ฤดูมีแต่ความสุข'],
+  ['Thuận buồm xuôi gió vượt trùng khơi\nBến giác bình yên nắng rạng ngời\nTài lộc dồi dào nhân duyên tốt\nBốn mùa hưng thịnh rộn niềm vui.','ล่องเรือฝ่าคลื่นลมไปได้ไกล\nถึงฝั่งปลอดภัยแสงทองส่องสดใส\nทรัพย์สินเพิ่มพูนพบมิตรที่ดี\nตลอดสี่ฤดูมีแต่ความสุข'],
   ['Đi xa gặp may, buôn bán thuận lợi, tình duyên êm đẹp, người thân mạnh khỏe.','เดินทางมีโชค การค้าราบรื่น ความรักสดใส คนในครอบครัวแข็งแรง'],
   ['Quẻ số 18, Thượng Cát, Xuân Phong Đắc Ý. Thuận buồm xuôi gió, tài lộc dồi dào, nhân duyên tốt đẹp.','เซียมซีหมายเลข 18 มงคล ลมวสันต์พัดพา ทุกสิ่งดำเนินไปอย่างราบรื่น การเงินดีและมีมิตรสัมพันธ์งดงาม'],
   ['Vũ Quá Thiên Thanh — Mưa Tạnh Trời Trong','ฝนผ่านฟ้าใส — อุปสรรคคลี่คลาย'],
-  ['Mưa qua trời lại sáng trong ngần\\nGian khó lùi xa đón phúc phần\\nGiữ vững lòng thành đừng nản chí\\nHoa thơm trái ngọt đến mười phân.','เมื่อฝนผ่านฟ้ากลับสดใส\\nความยากลำบากผ่านไปพบสิ่งดี\\nมั่นคงในความดีอย่าท้อถอย\\nผลแห่งความเพียรจะงอกงาม'],
+  ['Mưa qua trời lại sáng trong ngần\nGian khó lùi xa đón phúc phần\nGiữ vững lòng thành đừng nản chí\nHoa thơm trái ngọt đến mười phân.','เมื่อฝนผ่านฟ้ากลับสดใส\nความยากลำบากผ่านไปพบสิ่งดี\nมั่นคงในความดีอย่าท้อถอย\nผลแห่งความเพียรจะงอกงาม'],
   ['Khó khăn cũ sắp qua đi, vận may mới đang tới. Hãy kiên nhẫn và giữ tâm bình tĩnh.','อุปสรรคเก่ากำลังผ่านพ้น โชคใหม่กำลังมาถึง ขอให้อดทนและรักษาใจให้สงบ'],
   ['Quẻ số 24, Trung Cát, Vũ Quá Thiên Thanh. Mưa qua trời lại sáng trong, gian khó lùi xa để đón phúc phần mới.','เซียมซีหมายเลข 24 มงคลปานกลาง ฝนผ่านฟ้าใส ปัญหากำลังคลี่คลายและสิ่งดีใหม่กำลังเข้ามา'],
   ['Phúc Tinh Cao Chiếu — Sao Phúc Chiếu Mệnh','ดาวบุญส่องนำทาง — โชคดีคุ้มครอง'],
-  ['Phúc tinh rực sáng giữa đêm rằm\\nTừ bi Phật độ suốt quanh năm\\nTài lộc tự nhiên về gõ cửa\\nTrăm điều như ý vạn điều lành.','ดาวมงคลส่องสว่างกลางคืนเพ็ญ\\nพระเมตตาคุ้มครองตลอดปี\\nทรัพย์สินเงินทองมาเยือนถึงเรือนชาน\\nร้อยพันสิ่งสมหวังมีแต่ความดี'],
+  ['Phúc tinh rực sáng giữa đêm rằm\nTừ bi Phật độ suốt quanh năm\nTài lộc tự nhiên về gõ cửa\nTrăm điều như ý vạn điều lành.','ดาวมงคลส่องสว่างกลางคืนเพ็ญ\nพระเมตตาคุ้มครองตลอดปี\nทรัพย์สินเงินทองมาเยือนถึงเรือนชาน\nร้อยพันสิ่งสมหวังมีแต่ความดี'],
   ['Sao Phúc chiếu mạng, tai qua nạn khỏi, tiền tài sung túc, gia đạo hưng long.','ดาวมงคลคุ้มครองให้พ้นภัย การเงินอุดมสมบูรณ์ ครอบครัวเจริญรุ่งเรือง'],
   ['Quẻ số 36, Thượng Thượng Cát, Phúc Tinh Cao Chiếu. Sao Phúc chiếu mạng, tài lộc tự nhiên gõ cửa, trăm điều như ý.','เซียมซีหมายเลข 36 มหามงคล ดาวบุญส่องนำทาง มีสิ่งดีคุ้มครอง การเงินมีเกณฑ์รุ่งเรืองและสมหวังหลายประการ'],
   ['Ngọc Xuất Côn Sơn — Ngọc Quý Phát Sáng','หยกจากคุนซาน — คุณค่าปรากฏเด่นชัด'],
-  ['Ngọc quý Côn Sơn tỏa ánh ngời\\nBấy lâu rèn giũa nay gặp thời\\nTri âm tương ngộ cùng nâng đỡ\\nSự nghiệp thăng hoa rạng rỡ đời.','หยกงามเปล่งประกายจับแสงทอง\\nผ่านการฝึกฝนจนถึงวันสดใส\\nพบกัลยาณมิตรคอยเกื้อหนุน\\nหน้าที่การงานก้าวหน้ารุ่งเรือง'],
+  ['Ngọc quý Côn Sơn tỏa ánh ngời\nBấy lâu rèn giũa nay gặp thời\nTri âm tương ngộ cùng nâng đỡ\nSự nghiệp thăng hoa rạng rỡ đời.','หยกงามเปล่งประกายจับแสงทอง\nผ่านการฝึกฝนจนถึงวันสดใส\nพบกัลยาณมิตรคอยเกื้อหนุน\nหน้าที่การงานก้าวหน้ารุ่งเรือง'],
   ['Nỗ lực bấy lâu nay sắp được đền đáp xứng đáng. Có người tốt nâng đỡ trong công việc và cuộc sống.','ความพยายามที่ผ่านมาใกล้ได้รับผลตอบแทน มีคนดีคอยช่วยเหลือทั้งการงานและชีวิต'],
   ['Quẻ số 52, Thượng Cát, Ngọc Xuất Côn Sơn. Nỗ lực bấy lâu sắp được đền đáp xứng đáng, sự nghiệp thăng hoa.','เซียมซีหมายเลข 52 มงคล หยกจากคุนซาน ความพยายามกำลังผลิดอกออกผล การงานมีโอกาสก้าวหน้า'],
   ['Lộc Mã Đồng Hương — Lộc Tài Cùng Tới','โชคลาภมาถึง — ทรัพย์สินเพิ่มพูน'],
-  ['Lộc Mã song hành đến tận nhà\\nLàm ăn buôn bán nở như hoa\\nTâm thành bố thí thêm công đức\\nPhú quý vinh hoa khắp một nhà.','โชคลาภเดินทางมาถึงบ้าน\\nการค้าขายเติบโตงดงาม\\nมีจิตแบ่งปันเพิ่มพูนบุญกุศล\\nครอบครัวมั่งคั่งผาสุกทั่วหน้า'],
+  ['Lộc Mã song hành đến tận nhà\nLàm ăn buôn bán nở như hoa\nTâm thành bố thí thêm công đức\nPhú quý vinh hoa khắp một nhà.','โชคลาภเดินทางมาถึงบ้าน\nการค้าขายเติบโตงดงาม\nมีจิตแบ่งปันเพิ่มพูนบุญกุศล\nครอบครัวมั่งคั่งผาสุกทั่วหน้า'],
   ['Quẻ đại lợi về tài lộc và kinh doanh. Nên làm nhiều việc thiện để phúc đức càng thêm bền vững.','เซียมซีนี้ส่งเสริมด้านการเงินและการค้า ควรทำความดีอย่างสม่ำเสมอเพื่อให้บุญกุศลมั่นคง'],
   ['Quẻ số 68, Đại Cát, Lộc Mã Đồng Hương. Đại lợi về tài lộc và buôn bán, phú quý vinh hoa khắp một nhà.','เซียมซีหมายเลข 68 มหามงคล โชคลาภมาถึง การเงินและการค้าดี มีความมั่งคั่งทั่วครอบครัว'],
   ['Nguyệt Nhập Trung Thiên — Trăng Rằm Giữa Đỉnh','จันทร์เพ็ญกลางนภา — สว่างไสวทั่วทิศ'],
-  ['Trăng tròn vằng vặc giữa trời thu\\nSoi sáng muôn phương sạch mây mù\\nTình duyên viên mãn gia đình thuận\\nTâm an vạn sự chẳng ưu tư.','จันทร์เต็มดวงส่องกลางฟ้าฤดูสารท\\nแสงสว่างขจัดเมฆหมอกทั่วทิศา\\nความรักสมบูรณ์ครอบครัวร่มเย็น\\nจิตใจสงบไร้ความกังวล'],
+  ['Trăng tròn vằng vặc giữa trời thu\nSoi sáng muôn phương sạch mây mù\nTình duyên viên mãn gia đình thuận\nTâm an vạn sự chẳng ưu tư.','จันทร์เต็มดวงส่องกลางฟ้าฤดูสารท\nแสงสว่างขจัดเมฆหมอกทั่วทิศา\nความรักสมบูรณ์ครอบครัวร่มเย็น\nจิตใจสงบไร้ความกังวล'],
   ['Tình duyên và gia đạo vô cùng tốt đẹp. Người độc thân dễ gặp ý trung nhân, gia đình thêm tin vui.','ความรักและครอบครัวมีแนวโน้มดี ผู้ที่ยังโสดอาจพบคนถูกใจ ครอบครัวมีข่าวดี'],
   ['Quẻ số 81, Thượng Cát, Nguyệt Nhập Trung Thiên. Tình duyên viên mãn, gia đình hòa thuận, tâm an vạn sự lành.','เซียมซีหมายเลข 81 มงคล จันทร์เพ็ญกลางนภา ความรักสมหวัง ครอบครัวสามัคคี จิตใจสงบและพบสิ่งดี'],
   ['Vạn Sự Viên Thành — Cửu Cửu Đại Cát','ทุกสิ่งสำเร็จ — มหามงคลยิ่ง'],
-  ['Chín tầng mây trắng ánh hào quang\\nTừ bi Phật Tổ độ nhân gian\\nThí chủ lòng thành dâng lễ bái\\nTrọn đời trường thọ hưởng vinh khang.','เมฆาขาวเก้าชั้นเปล่งประกาย\\nพระเมตตาคุ้มครองผู้คนทั่วหล้า\\nผู้มีศรัทธาตั้งใจถวายสักการะ\\nอายุยืนยาวผาสุกและรุ่งเรือง'],
+  ['Chín tầng mây trắng ánh hào quang\nTừ bi Phật Tổ độ nhân gian\nThí chủ lòng thành dâng lễ bái\nTrọn đời trường thọ hưởng vinh khang.','เมฆาขาวเก้าชั้นเปล่งประกาย\nพระเมตตาคุ้มครองผู้คนทั่วหล้า\nผู้มีศรัทธาตั้งใจถวายสักการะ\nอายุยืนยาวผาสุกและรุ่งเรือง'],
   ['Quẻ tối thượng cát tường. Sức khỏe trường thọ, công danh hiển đạt, vạn sự viên thành.','เซียมซีมงคลสูงสุด สุขภาพแข็งแรงอายุยืน การงานก้าวหน้า ทุกสิ่งสำเร็จสมปรารถนา'],
   ['Quẻ số 99, Thượng Thượng Cát, Vạn Sự Viên Thành. Quẻ tối thượng cát tường, sức khỏe trường thọ, vạn sự như ý.','เซียมซีหมายเลข 99 มหามงคลยิ่ง ทุกสิ่งสำเร็จ สุขภาพแข็งแรงอายุยืน และสมปรารถนาทุกประการ'],
   ['Đang tải trạng thái hệ thống...','กำลังโหลดสถานะระบบ...'],
@@ -872,12 +872,12 @@ for (const file of filesToTranslate) {
       '<button class="btn gold" id="btnConn">เชื่อมต่อ LIVE</button>'
     );
     html = html.replace(
-      '<div class="row">\\n          <input type="text" id="ttsDirectText"',
-      '<div class="row">\\n          <input type="text" id="ttRoomId" inputmode="numeric" placeholder="Room ID (ถ้ามี) เพื่อเชื่อมต่อโดยตรง" />\\n        </div>\\n        <div class="row">\\n          <input type="text" id="ttsDirectText"'
+      '<div class="row">\n          <input type="text" id="ttsDirectText"',
+      '<div class="row">\n          <input type="text" id="ttRoomId" inputmode="numeric" placeholder="Room ID (ถ้ามี) เพื่อเชื่อมต่อโดยตรง" />\n        </div>\n        <div class="row">\n          <input type="text" id="ttsDirectText"'
     );
     html = html.replace(
-      "const username = document.getElementById('ttUser').value.trim();\\n      sendRpc('live.connect', { username });",
-      "const username = document.getElementById('ttUser').value.trim();\\n      const roomId = document.getElementById('ttRoomId').value.trim();\\n      sendRpc('live.connect', { username, roomId });"
+      "const username = document.getElementById('ttUser').value.trim();\n      sendRpc('live.connect', { username });",
+      "const username = document.getElementById('ttUser').value.trim();\n      const roomId = document.getElementById('ttRoomId').value.trim();\n      sendRpc('live.connect', { username, roomId });"
     );
   }
   if (file === 'public/index.html') {
@@ -904,7 +904,7 @@ server = server.replace(
 );
 server = server.replace(
   "  const cleanUser = await resolveTikTokUsername(usernameOrUrl);",
-  "  const cleanUser = await resolveTikTokUsername(usernameOrUrl);\\n  const directRoomId = String(roomIdOverride || '').trim();\\n  if (directRoomId && !/^\\\\d+$/.test(directRoomId)) throw new Error('Room ID ต้องเป็นตัวเลขเท่านั้น');"
+  "  const cleanUser = await resolveTikTokUsername(usernameOrUrl);\n  const directRoomId = String(roomIdOverride || '').trim();\n  if (directRoomId && !/^\\d+$/.test(directRoomId)) throw new Error('Room ID ต้องเป็นตัวเลขเท่านั้น');"
 );
 server = server.replace(
   'const roomState = await connection.connect();',
