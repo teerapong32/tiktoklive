@@ -805,6 +805,18 @@ const ADMIN_EXACT_TRANSLATIONS = [
 ];
 translations.push(...ADMIN_EXACT_TRANSLATIONS);
 
+
+const GREETING_CLEANUP_TRANSLATIONS = [
+  ['Nam mô A Di Đà Phật. Chùa Linh Ứng Online xin kính chào quý thí chủ thập phương.', 'นะโม อมิตาภพุทธ วัดหลินอึ๋งออนไลน์ขอต้อนรับผู้ร่วมทำบุญจากทั่วสารทิศ'],
+  ['Nam Mô A Di Đà Phật. Chùa Linh Ứng Online xin kính chào quý thí chủ thập phương.', 'นะโม อมิตาภพุทธ วัดหลินอึ๋งออนไลน์ขอต้อนรับผู้ร่วมทำบุญจากทั่วสารทิศ'],
+  ['Chùa Linh Ứng Online xin kính chào quý thí chủ thập phương.', 'วัดหลินอึ๋งออนไลน์ขอต้อนรับผู้ร่วมทำบุญจากทั่วสารทิศ'],
+  ['xin kính chào quý', 'ขอต้อนรับ'],
+  ['Xin kính chào quý', 'ขอต้อนรับ'],
+  ['thập phương', 'จากทั่วสารทิศ'],
+  ['Thập phương', 'จากทั่วสารทิศ']
+];
+translations.push(...GREETING_CLEANUP_TRANSLATIONS);
+
 translations.sort((a, b) => b[0].length - a[0].length);
 
 function collectJsFiles(dir) {
