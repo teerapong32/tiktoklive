@@ -1,48 +1,40 @@
-# ส่วนเสริมภาษาไทยสำหรับ TikTok Live Temple RPC
+# ติดตั้ง TikTok Live Temple ภาษาไทย
 
-โฟลเดอร์ `temple-source/` เป็น Git submodule ที่อ้างอิงโปรเจกต์ต้นฉบับ
-[zane-tv/tiktok-live-temple-rpc](https://github.com/zane-tv/tiktok-live-temple-rpc)
-โดยตรึงไว้ที่ commit `c967132b43d266d2d0c7d25e5b7f219bd6379a08`
+โปรเจกต์ต้นฉบับ: https://github.com/zane-tv/tiktok-live-temple-rpc
+Repository หลัก: https://github.com/teerapong32/tiktoklive
 
-## สิ่งที่ปรับเป็นภาษาไทย
+## คุณสมบัติ
+- ฉากวัดแนวตั้ง 9:16 สำหรับ TikTok LIVE / OBS
+- รับกิจกรรม TikTok LIVE ผ่าน TikTok Live Connector
+- ระบบจุดธูป สวดคำอธิษฐาน เสี่ยงเซียมซี กดหัวใจ แชร์ ติดตาม และของขวัญ
+- แผง Admin และ JSON-RPC / WebSocket
+- เปลี่ยนตัวกรองข้อความจากภาษาเวียดนามเป็น Unicode ทุกภาษา เพื่อให้รองรับชื่อและคอมเมนต์ภาษาไทย
+- เปลี่ยน ZeroTTS ภาษาเวียดนามเป็น Microsoft Edge Neural TTS ภาษาไทย
+- เสียงเริ่มต้น: th-TH-PremwadeeNeural และรองรับ th-TH-NiwatNeural
 
-- กำหนดภาษาเอกสารหน้า LIVE และ Admin เป็น `th`
-- เปลี่ยนฟอนต์ UI เป็น Noto Sans Thai
-- เปลี่ยนชื่อเสียงและสถานะจาก ZeroTTS / Mai Chi เป็นเสียงสังเคราะห์ภาษาไทย
-- เปลี่ยน Worker ที่กรองข้อความเวียดนามและเรียก `normalize_vi_text` เป็น Thai TTS worker
-- ใช้เสียงประสาทเทียมภาษาไทย `th-TH-PremwadeeNeural` (หญิง) และ `th-TH-NiwatNeural` (ชาย)
-- คงโปรโตคอล JSON worker เดิม เพื่อให้ server เดิมส่งไฟล์เสียงผ่าน `/tts-cache` ได้
+## Deploy บน Render
+สร้าง Web Service จาก Repository นี้ โดยเลือก Blueprint จากไฟล์ `render.yaml`
+หรือใช้ Docker:
+- Dockerfile: `temple-thai/Dockerfile`
+- Docker Context: `.`
+- Health check: `/api/state`
 
-> หมายเหตุ: UI ต้นฉบับมีข้อความภาษาไทยอยู่แล้วเป็นส่วนใหญ่ จุดที่เป็นภาษาเวียดนามจริงและทำให้เสียงไทยใช้ไม่ได้คือ TTS worker ซึ่งเดิมกรองเฉพาะอักษรเวียดนามและเรียก normalize_vi_text
+Docker build จะติดตั้ง Bun, Python, edge-tts และรันสคริปต์แปลภาษาไทยให้อัตโนมัติ
 
-## ติดตั้งและเริ่มใช้งาน
-
+## รันในเครื่อง
 ต้อง clone พร้อม submodule:
 
 ```bash
 git clone --recurse-submodules https://github.com/teerapong32/tiktoklive.git
 cd tiktoklive
-node temple-thai/apply-thai.mjs
-cd temple-source
-bun install
-uv venv .venv
-uv pip install --python .venv/bin/python edge-tts
-bun start
+docker build -f temple-thai/Dockerfile -t tiktok-temple-thai .
+docker run --rm -p 10000:10000 tiktok-temple-thai
 ```
 
-หาก clone repository ไปแล้ว ให้ดึง submodule ก่อน:
+## URL หลัง Deploy
+- หน้า LIVE: `https://YOUR-RENDER-SERVICE.onrender.com/`
+- OBS แนวตั้ง 9:16: `https://YOUR-RENDER-SERVICE.onrender.com/?obs=1`
+- Admin: `https://YOUR-RENDER-SERVICE.onrender.com/admin`
+- สถานะ: `https://YOUR-RENDER-SERVICE.onrender.com/api/state`
 
-```bash
-git submodule update --init --recursive
-node temple-thai/apply-thai.mjs
-```
-
-เสียง Edge TTS ต้องเชื่อมต่ออินเทอร์เน็ตเพื่อสังเคราะห์เสียงและดาวน์โหลดเสียงครั้งแรก เสียงที่สร้างแล้วจะถูกเก็บไว้ใน `data/tts-cache`
-
-## URL ภายในระบบ
-
-- LIVE: `http://localhost:3000/`
-- OBS แนวตั้ง 9:16: `http://localhost:3000/?obs=1`
-- Admin: `http://localhost:3000/admin`
-
-การเพิ่ม submodule และส่วนเสริมนี้ยังไม่เปลี่ยนค่า Root Directory หรือการ Deploy ของ Vercel/Render ที่ใช้งานอยู่ ต้องตั้งบริการให้ build จาก `temple-source` แยกต่างหากก่อนเปิดใช้งานจริง
+หมายเหตุ: แผน Free ของ Render อาจพักบริการเมื่อไม่มีการใช้งาน และอาจมีความหน่วงตอนเริ่มใหม่ เสียง Edge TTS ต้องใช้อินเทอร์เน็ต ส่วนข้อมูลที่เก็บใน filesystem ของแผน Free อาจไม่ถาวรเมื่อมีการ redeploy/restart จึงควรเพิ่ม persistent disk หากต้องเก็บสถิติระยะยาว
