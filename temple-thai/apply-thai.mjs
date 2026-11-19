@@ -788,6 +788,23 @@ const LIVE_RUNTIME_TRANSLATIONS = [
 ];
 translations.push(...LIVE_RUNTIME_TRANSLATIONS);
 
+
+const ADMIN_EXACT_TRANSLATIONS = [
+ ['Con xin gieo quẻ cầu tài lộc đầu tháng ạ','ข้าพเจ้าขอเสี่ยงเซียมซีเพื่อขอพรด้านโชคลาภในช่วงต้นเดือน'],
+ ['Đại Thí Chủ Minh Tâm','ผู้ร่วมทำบุญผู้มีจิตศรัทธา'],
+ ['Từ khóa tự động nhận diện:','คำสำคัญที่ระบบตรวจจับอัตโนมัติ:'],
+ ['thắp hương','ถวายธูป'],
+ ['bái phật','กราบไหว้พระ'],
+ ['cầu ...','คำอธิษฐาน / ขอพร'],
+ ['xin xăm / gieo quẻ','เสี่ยงเซียมซี / เสี่ยงทาย'],
+ ['thỉnh chuông','สั่นระฆัง'],
+ ['gõ mõ','เคาะไม้สวดมนต์'],
+ ['Tên người xem...','ชื่อผู้ชม...'],
+ ['Nhập nội dung bình luận TikTok...','กรอกข้อความความคิดเห็น TikTok...'],
+ ['Lời cầu nguyện...','คำอธิษฐาน...']
+];
+translations.push(...ADMIN_EXACT_TRANSLATIONS);
+
 translations.sort((a, b) => b[0].length - a[0].length);
 
 function collectJsFiles(dir) {
