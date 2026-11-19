@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(process.argv[2] || 'temple-source');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
@@ -75,5 +76,6 @@ server = server.replaceAll('zenfacts_vn', 'allaboutitscript');
 server = server.replaceAll('Thí Chủ Hữu Duyên', 'ผู้มีบุญร่วมสร้างกุศล');
 write('server.js', server);
 
-fs.copyFileSync(path.resolve('temple-thai/tts_worker.py'), path.join(root, 'tts_worker.py'));
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+fs.copyFileSync(path.join(scriptDir, 'tts_worker.py'), path.join(root, 'tts_worker.py'));
 console.log('ติดตั้งส่วนแปลภาษาไทยและระบบเสียงภาษาไทยแล้ว');
