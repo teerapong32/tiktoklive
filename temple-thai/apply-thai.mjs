@@ -1173,6 +1173,8 @@ server = server.replace(
     "}"
   ].join('\n')
 );
+server = server.replace(
+  'const memberGreetingCooldownMap = new Map();\\n  const MEMBER_GREETING_COOLDOWN_MS = 180000;\\n  const commentCooldownMap = new Map();',
   `function formatTikTokError(err) {
     const summarize = (item) => ({
       name: item?.name || 'Error',
