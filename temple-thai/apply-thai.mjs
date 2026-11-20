@@ -970,18 +970,14 @@ server = server.replace(
     throw new Error('Vui lòng nhập @username hoặc link TikTok Live cần kết nối');
   }
   if (input.startsWith('http://') || input.startsWith('https://') || input.includes('tiktok.com/')) {
-    const urlToFetch = input.startsWith('http') ? input : \`https://\${input}\`;
+    const urlToFetch = input.startsWith('http') ? input : 'https://' + input;
     const directMatch = urlToFetch.match(/tiktok\\.com\\/@([^/?#]+)/i);
-    if (directMatch && directMatch[1]) {
-      return directMatch[1];
-    }
+    if (directMatch && directMatch[1]) return directMatch[1];
     try {
       const resp = await fetch(urlToFetch, { redirect: 'follow' });
       const finalUrl = resp.url || '';
       const resolvedMatch = finalUrl.match(/tiktok\\.com\\/@([^/?#]+)/i);
-      if (resolvedMatch && resolvedMatch[1]) {
-        return resolvedMatch[1];
-      }
+      if (resolvedMatch && resolvedMatch[1]) return resolvedMatch[1];
     } catch (e) {
       console.warn('[TikTok URL Resolve Warning]', e.message);
     }
