@@ -1253,7 +1253,7 @@ server = server.replace(
 );
 server = server.replace(
   "app.get('/api/state', (_req, res) => {",
-  \`app.get('/api/background-music', (_req, res) => {
+  `app.get('/api/background-music', (_req, res) => {
   res.json({
     url: state.settings.bgMusicUrl || 'https://www.youtube.com/watch?v=hgUY8UWwPjc',
     enabled: state.settings.bgMusicEnabled !== false,
@@ -1272,7 +1272,7 @@ app.post('/api/background-music', (req, res) => {
   res.json({ ok: true, url: state.settings.bgMusicUrl, enabled: state.settings.bgMusicEnabled, volume: state.settings.bgMusicVolume });
 });
 
-app.get('/api/state', (_req, res) => {\`
+app.get('/api/state', (_req, res) => {`
 );
 
 write('server.js', server);
@@ -1284,7 +1284,7 @@ const adminFile = path.join(root, 'public', 'admin.html');
 if (fs.existsSync(adminFile)) {
   let admin = fs.readFileSync(adminFile, 'utf8');
   const adminAnchor = '      <section class="card">\n        <h2>🔌 4.';
-  const musicCard = \`      <section class="card" id="backgroundMusicSettings">
+  const musicCard = `      <section class="card" id="backgroundMusicSettings">
         <h2>🎵 5. ตั้งค่าเสียงพื้นหลัง YouTube</h2>
         <label for="bgMusicUrl">ลิงก์ YouTube</label>
         <input id="bgMusicUrl" type="url" value="https://www.youtube.com/watch?v=hgUY8UWwPjc" placeholder="วางลิงก์ YouTube ที่นี่" />
@@ -1297,12 +1297,12 @@ if (fs.existsSync(adminFile)) {
         <button class="btn gold" id="btnSaveBgMusic" type="button">บันทึกการตั้งค่าเสียงพื้นหลัง</button>
         <p id="bgMusicSaveStatus" style="font-size:13px;color:var(--muted)">ค่าเริ่มต้น: เปิดเสียงจากลิงก์ YouTube ที่กำหนดไว้</p>
       </section>
-\`;
+`;
   if (!admin.includes('id="backgroundMusicSettings"') && admin.includes(adminAnchor)) {
     admin = admin.replace(adminAnchor, musicCard + adminAnchor);
   }
   const adminScriptAnchor = '    refreshStatus();';
-  const adminMusicScript = \`
+  const adminMusicScript = `
     const bgMusicVolume = document.getElementById('bgMusicVolume');
     bgMusicVolume?.addEventListener('input', () => {
       document.getElementById('bgMusicVolumeValue').textContent = bgMusicVolume.value + '%';
@@ -1340,7 +1340,7 @@ if (fs.existsSync(adminFile)) {
       }
     });
     loadBgMusicSettings();
-\`;
+`;
   if (!admin.includes('loadBgMusicSettings();') && admin.includes(adminScriptAnchor)) {
     admin = admin.replace(adminScriptAnchor, adminMusicScript + '\n    ' + adminScriptAnchor);
   }
@@ -1350,7 +1350,7 @@ if (fs.existsSync(adminFile)) {
 const liveFile = path.join(root, 'public', 'index.html');
 if (fs.existsSync(liveFile)) {
   let live = fs.readFileSync(liveFile, 'utf8');
-  const liveMusic = \`
+  const liveMusic = `
   <div id="templeBgMusicDock" style="position:fixed;right:12px;bottom:12px;width:220px;z-index:99999;background:#160805;border:1px solid #d5a64a;border-radius:10px;padding:4px;color:#fff;font:12px sans-serif">
     <div id="templeBgMusicPlayer" style="width:210px;height:200px"></div>
     <div id="templeBgMusicStatus" style="padding:3px 4px">กำลังเตรียมเสียงพื้นหลัง...</div>
@@ -1421,7 +1421,7 @@ if (fs.existsSync(liveFile)) {
     document.head.appendChild(tag);
   })();
   </script>
-\`;
+`;
   if (!live.includes('id="templeBgMusicDock"') && live.includes('</body>')) {
     live = live.replace('</body>', liveMusic + '\n</body>');
   }
