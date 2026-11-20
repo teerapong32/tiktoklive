@@ -961,7 +961,8 @@ server = server.replace(
       candidates.push(parsed.href);
     } catch (_) {}
   }
-  if (username) candidates.push('https://www.tiktok.com/@' + encodeURIComponent(username) + '/live');
+  const candidateUser = username || (!input.startsWith('http') && !input.includes('tiktok.com') ? input.replace(/^@/, '').split(/[/?#]/)[0].trim() : '');
+  if (candidateUser) candidates.push('https://www.tiktok.com/@' + encodeURIComponent(candidateUser) + '/live');
   for (const pageUrl of [...new Set(candidates)]) {
     try {
       const response = await fetch(pageUrl, {
@@ -1002,11 +1003,12 @@ server = server.replace(
   `async function connectTikTokLive(usernameOrUrl, roomIdOverride = '') {
   const directRoomId = String(roomIdOverride || '').trim();
   if (directRoomId && !/^[0-9]+$/.test(directRoomId)) throw new Error('Room ID ต้องเป็นตัวเลขเท่านั้น');
-  const cleanUser = directRoomId
-    ? (String(usernameOrUrl || '').trim().replace(/^@/, '') || 'room_' + directRoomId)
+  // Resolve the live room before username lookup: TikTok may block the username API while the LIVE page still exposes its room ID.
+  const autoRoomId = directRoomId || await resolveTikTokRoomId(usernameOrUrl, '');
+  const cleanUser = autoRoomId
+    ? (String(usernameOrUrl || '').trim().replace(/^@/, '').split(/[/?#]/)[0] || 'room_' + autoRoomId)
     : await resolveTikTokUsername(usernameOrUrl);
-  const autoRoomId = directRoomId || await resolveTikTokRoomId(usernameOrUrl, cleanUser);
-  if (autoRoomId) console.log('[TikTok Room ID] Resolved room ' + autoRoomId + ' for @' + cleanUser);`
+  if (autoRoomId) console.log('[TikTok Room ID] Automatically resolved room ' + autoRoomId + ' for ' + cleanUser);`
 );
 server = server.replace(
   /async function resolveTikTokUsername\(rawInput\) \{[\s\S]*?\n\}/,
