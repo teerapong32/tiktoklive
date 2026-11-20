@@ -865,7 +865,7 @@ for (const file of filesToTranslate) {
   if (file === 'public/admin.html') {
     html = html.replace(
       '<input type="text" id="ttUser" placeholder="Nhập @username TikTok đang phát Live..." />',
-      '<input type="text" id="ttUser" placeholder="กรอก @username TikTok ที่กำลัง LIVE..." />'
+      '<input type="text" id="ttUser" placeholder="กรอก @username หรือลิงก์แชร์ TikTok LIVE..." />'
     );
     html = html.replace(
       '<button class="btn gold" id="btnConn">Kết Nối Live</button>',
@@ -962,6 +962,58 @@ server = server.replace(
     : await resolveTikTokUsername(usernameOrUrl);
   const autoRoomId = directRoomId || await resolveTikTokRoomId(usernameOrUrl, cleanUser);
   if (autoRoomId) console.log('[TikTok Room ID] Resolved room ' + autoRoomId + ' for @' + cleanUser);`
+);
+server = server.replace(
+  \`async function resolveTikTokUsername(rawInput) {
+  let input = String(rawInput || '').trim();
+  if (!input) {
+    throw new Error('Vui lòng nhập @username hoặc link TikTok Live cần kết nối');
+  }
+  if (input.startsWith('http://') || input.startsWith('https://') || input.includes('tiktok.com/')) {
+    const urlToFetch = input.startsWith('http') ? input : \`https://\${input}\`;
+    const directMatch = urlToFetch.match(/tiktok\\.com\\/@([^/?#]+)/i);
+    if (directMatch && directMatch[1]) {
+      return directMatch[1];
+    }
+    try {
+      const resp = await fetch(urlToFetch, { redirect: 'follow' });
+      const finalUrl = resp.url || '';
+      const resolvedMatch = finalUrl.match(/tiktok\\.com\\/@([^/?#]+)/i);
+      if (resolvedMatch && resolvedMatch[1]) {
+        return resolvedMatch[1];
+      }
+    } catch (e) {
+      console.warn('[TikTok URL Resolve Warning]', e.message);
+    }
+  }
+  return input.replace(/^@/, '').split(/[/?#]/)[0].trim();
+}\`,
+  \`async function resolveTikTokUsername(rawInput) {
+  const input = String(rawInput || '').trim();
+  if (!input) throw new Error('กรุณากรอก @username หรือลิงก์ TikTok LIVE');
+  if (/^\\\\d{8,}$/.test(input)) return 'room_' + input;
+  if (/^https?:\\\\/\\\\//i.test(input) || /(?:^|\\\\.)tiktok\\\\.com\\\\//i.test(input)) {
+    const urlToFetch = /^https?:\\\\/\\\\//i.test(input) ? input : 'https://' + input;
+    const directRoom = urlToFetch.match(/\\\\/(?:live|room)\\\\/(\\\\d{8,})(?:[/?#]|$)/i);
+    if (directRoom) return 'room_' + directRoom[1];
+    try {
+      const resp = await fetch(urlToFetch, {
+        redirect: 'follow',
+        signal: AbortSignal.timeout(9000),
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36' }
+      });
+      const finalUrl = resp.url || urlToFetch;
+      const userMatch = finalUrl.match(/tiktok\\\\.com\\\\/@([^/?#]+)/i);
+      if (userMatch?.[1]) return userMatch[1];
+      const roomMatch = finalUrl.match(/\\\\/(?:live|room)\\\\/(\\\\d{8,})(?:[/?#]|$)/i);
+      if (roomMatch) return 'room_' + roomMatch[1];
+    } catch (err) {
+      console.warn('[TikTok URL Resolve Warning]', err?.message || String(err));
+    }
+    throw new Error('ไม่สามารถอ่านลิงก์ TikTok ได้ กรุณาใช้ลิงก์แชร์ LIVE หรือ @username');
+  }
+  return input.replace(/^@/, '').split(/[/?#]/)[0].trim();
+}\`
 );
 server = server.replace(
   'const roomState = await connection.connect();',
