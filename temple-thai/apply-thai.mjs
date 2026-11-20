@@ -1033,14 +1033,20 @@ server = server.replace(
       if (urlRoom) return urlRoom[1];
 
       const scriptPatterns = [
-        /<script[^>]+id=["']SIGI_STATE["'][^>]*>([\\s\\S]*?)<\\/script>/i,
-        /<script[^>]+id=["']__UNIVERSAL_DATA_FOR_REHYDRATION__["'][^>]*>([\\s\\S]*?)<\\/script>/i
+        /<script[^>]*\\bid=["']SIGI_STATE["'][^>]*>([\\s\\S]*?)<\\/script>/i,
+        /<script[^>]*\\bid=["']__UNIVERSAL_DATA_FOR_REHYDRATION__["'][^>]*>([\\s\\S]*?)<\\/script>/i
       ];
       for (const pattern of scriptPatterns) {
         const match = html.match(pattern);
         if (match) {
           try {
-            const room = extractRoom(JSON.parse(match[1]));
+            const parsed = JSON.parse(match[1]);
+            const liveUser = parsed?.LiveRoom?.liveRoomUserInfo?.user;
+            const directRoom = liveUser?.roomId;
+            const room = directRoom != null && /^\\d{8,}$/.test(String(directRoom))
+              ? String(directRoom)
+              : extractRoom(parsed);
+            if (liveUser) console.log('[TikTok LIVE page data]', JSON.stringify({ uniqueId: liveUser.uniqueId || '', status: liveUser.status ?? null, roomIdFound: Boolean(room) }));
             if (room) {
               console.log('[TikTok Room ID] Resolved from embedded LIVE page data: ' + room);
               return room;
