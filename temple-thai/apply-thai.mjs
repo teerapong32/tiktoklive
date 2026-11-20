@@ -944,50 +944,126 @@ write('public/css/live.css', css);
 
 let server = read('server.js');
 server = server.replace(
-  `async function connectTikTokLive(usernameOrUrl) {`,
-  `async function resolveTikTokRoomId(rawInput, username) {
+  \`async function connectTikTokLive(usernameOrUrl) {\`,
+  \`async function resolveTikTokRoomId(rawInput, username) {
   const input = String(rawInput || '').trim();
   if (/^\\d{8,}$/.test(input)) return input;
-  const candidates = [];
-  if (/^https?:\\/\\//i.test(input) || /(?:^|\\.)tiktok\\.com\\//i.test(input)) {
-    try {
-      const parsed = new URL(input.startsWith('http') ? input : 'https://' + input);
-      for (const key of ['room_id', 'roomId', 'roomID']) {
-        const value = parsed.searchParams.get(key);
-        if (value && /^\\d{8,}$/.test(value)) return value;
+  const cleanUser = String(username || input.replace(/^@/, '').split(/[/?#]/)[0]).trim();
+  if (!cleanUser || /^https?:\\/\\//i.test(cleanUser)) return null;
+
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    'Accept': 'text/html,application/json,application/xhtml+xml,*/*',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://www.tiktok.com/@' + encodeURIComponent(cleanUser) + '/live',
+    'Origin': 'https://www.tiktok.com'
+  };
+  const extractRoom = (value, depth = 0) => {
+    if (!value || depth > 12) return '';
+    if (typeof value === 'string') {
+      const unescaped = value.replace(/\\\\u002F/g, '/').replace(/\\\\\\"/g, '"').replace(/\\\\\\\\/g, '\\\\');
+      if (unescaped !== value) {
+        const found = extractRoom(unescaped, depth + 1);
+        if (found) return found;
       }
-      const pathMatch = parsed.pathname.match(/\\/(?:live|room)\\/(\\d{8,})/i);
-      if (pathMatch) return pathMatch[1];
-      candidates.push(parsed.href);
-    } catch (_) {}
-  }
-  const candidateUser = username || (!input.startsWith('http') && !input.includes('tiktok.com') ? input.replace(/^@/, '').split(/[/?#]/)[0].trim() : '');
-  if (candidateUser) candidates.push('https://www.tiktok.com/@' + encodeURIComponent(candidateUser) + '/live');
-  for (const pageUrl of [...new Set(candidates)]) {
-    try {
-      const response = await fetch(pageUrl, {
-        redirect: 'follow',
-        signal: AbortSignal.timeout(9000),
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.9'
+      return '';
+    }
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const found = extractRoom(item, depth + 1);
+        if (found) return found;
+      }
+      return '';
+    }
+    if (typeof value === 'object') {
+      for (const key of ['roomId', 'room_id', 'roomID', 'room_id_str']) {
+        const candidate = value[key];
+        if (candidate != null && /^\\d{8,}$/.test(String(candidate))) return String(candidate);
+      }
+      for (const key of ['liveRoom', 'live_room', 'user', 'data', 'userInfo', 'user_info', 'LiveRoom', '__DEFAULT_SCOPE__']) {
+        if (value[key] != null) {
+          const found = extractRoom(value[key], depth + 1);
+          if (found) return found;
         }
-      });
-      const finalUrl = response.url || pageUrl;
-      const finalPathMatch = finalUrl.match(/\\/(?:live|room)\\/(\\d{8,})/i);
-      if (finalPathMatch) return finalPathMatch[1];
-      if (!response.ok) continue;
+      }
+      for (const child of Object.values(value)) {
+        if (child && typeof child === 'object') {
+          const found = extractRoom(child, depth + 1);
+          if (found) return found;
+        }
+      }
+    }
+    return '';
+  };
+
+  const apiUrls = [
+    'https://www.tiktok.com/api-live/user/room/?uniqueId=' + encodeURIComponent(cleanUser) + '&sourceType=54',
+    'https://m.tiktok.com/api-live/user/room/?uniqueId=' + encodeURIComponent(cleanUser) + '&sourceType=54'
+  ];
+  for (const apiUrl of apiUrls) {
+    try {
+      const response = await fetch(apiUrl, { headers, redirect: 'follow', signal: AbortSignal.timeout(10000) });
+      const body = await response.text();
+      try {
+        const data = JSON.parse(body);
+        const room = extractRoom(data?.data?.user) || extractRoom(data?.data?.liveRoom) || extractRoom(data);
+        if (room) {
+          console.log('[TikTok Room ID] Resolved via API-live: ' + room);
+          return room;
+        }
+        console.warn('[TikTok Room ID API]', JSON.stringify({ host: new URL(apiUrl).host, status: response.status, message: data?.message || data?.status_msg || 'roomId not present' }));
+      } catch (_) {
+        console.warn('[TikTok Room ID API] Non-JSON response, HTTP ' + response.status);
+      }
+    } catch (err) {
+      console.warn('[TikTok Room ID API]', err?.message || String(err));
+    }
+  }
+
+  const pageUrls = [
+    'https://www.tiktok.com/@' + encodeURIComponent(cleanUser) + '/live',
+    'https://www.tiktok.com/@' + encodeURIComponent(cleanUser)
+  ];
+  for (const pageUrl of pageUrls) {
+    try {
+      const response = await fetch(pageUrl, { headers, redirect: 'follow', signal: AbortSignal.timeout(12000) });
       const html = await response.text();
-      const patterns = [
+      const finalUrl = response.url || pageUrl;
+      const urlRoom = finalUrl.match(/\\/(?:live|room)\\/(\\d{8,})(?:[/?#]|$)/i);
+      if (urlRoom) return urlRoom[1];
+
+      const scriptPatterns = [
+        /<script[^>]+id=["']SIGI_STATE["'][^>]*>([\\s\\S]*?)<\\/script>/i,
+        /<script[^>]+id=["']__UNIVERSAL_DATA_FOR_REHYDRATION__["'][^>]*>([\\s\\S]*?)<\\/script>/i
+      ];
+      for (const pattern of scriptPatterns) {
+        const match = html.match(pattern);
+        if (match) {
+          try {
+            const room = extractRoom(JSON.parse(match[1]));
+            if (room) {
+              console.log('[TikTok Room ID] Resolved from embedded LIVE page data: ' + room);
+              return room;
+            }
+          } catch (_) {}
+        }
+      }
+
+      const source = html.replace(/\\\\\\"/g, '"').replace(/\\\\\\\\/g, '\\\\');
+      const roomPatterns = [
         /["']roomId["']\\s*:\\s*["']?(\\d{8,})/i,
         /["']room_id["']\\s*:\\s*["']?(\\d{8,})/i,
-        /["']roomID["']\\s*:\\s*["']?(\\d{8,})/i
+        /["']roomID["']\\s*:\\s*["']?(\\d{8,})/i,
+        /liveRoomUserInfo["'][\\s\\S]{0,2000}?["']roomId["']\\s*:\\s*["']?(\\d{8,})/i
       ];
-      for (const pattern of patterns) {
-        const match = html.match(pattern);
-        if (match) return match[1];
+      for (const pattern of roomPatterns) {
+        const match = source.match(pattern);
+        if (match) {
+          console.log('[TikTok Room ID] Resolved from LIVE page HTML: ' + match[1]);
+          return match[1];
+        }
       }
+      console.warn('[TikTok Room ID Page]', JSON.stringify({ status: response.status, finalUrl, bytes: html.length, foundUniversalData: html.includes('__UNIVERSAL_DATA_FOR_REHYDRATION__'), foundSigiState: html.includes('SIGI_STATE') }));
     } catch (err) {
       console.warn('[TikTok Room ID Page Resolve]', err?.message || String(err));
     }
@@ -995,24 +1071,23 @@ server = server.replace(
   return null;
 }
 
-async function connectTikTokLive(usernameOrUrl) {`
+async function connectTikTokLive(usernameOrUrl) {\`
 );
 server = server.replace(
-  `async function connectTikTokLive(usernameOrUrl) {
-  const cleanUser = await resolveTikTokUsername(usernameOrUrl);`,
-  `async function connectTikTokLive(usernameOrUrl, roomIdOverride = '') {
+  \`async function connectTikTokLive(usernameOrUrl) {
+  const cleanUser = await resolveTikTokUsername(usernameOrUrl);\`,
+  \`async function connectTikTokLive(usernameOrUrl, roomIdOverride = '') {
   const directRoomId = String(roomIdOverride || '').trim();
-  if (directRoomId && !/^[0-9]+$/.test(directRoomId)) throw new Error('Room ID ต้องเป็นตัวเลขเท่านั้น');
-  // Resolve the live room before username lookup: TikTok may block the username API while the LIVE page still exposes its room ID.
+  if (directRoomId && !/^\\d+$/.test(directRoomId)) throw new Error('Room ID ต้องเป็นตัวเลขเท่านั้น');
   const autoRoomId = directRoomId || await resolveTikTokRoomId(usernameOrUrl, '');
   const cleanUser = autoRoomId
     ? (String(usernameOrUrl || '').trim().replace(/^@/, '').split(/[/?#]/)[0] || 'room_' + autoRoomId)
     : await resolveTikTokUsername(usernameOrUrl);
-  if (autoRoomId) console.log('[TikTok Room ID] Automatically resolved room ' + autoRoomId + ' for ' + cleanUser);`
+  if (autoRoomId) console.log('[TikTok Room ID] Automatically resolved room ' + autoRoomId + ' for ' + cleanUser);\`
 );
 server = server.replace(
-  /async function resolveTikTokUsername\(rawInput\) \{[\s\S]*?\n\}/,
-  `async function resolveTikTokUsername(rawInput) {
+  /async function resolveTikTokUsername\\(rawInput\\) \\{[\\s\\S]*?\\n\\}/,
+  String.raw\`async function resolveTikTokUsername(rawInput) {
   const input = String(rawInput || '').trim();
   if (!input) throw new Error('กรุณากรอก @username หรือลิงก์ TikTok LIVE');
   if (/^\\d{8,}$/.test(input)) return 'room_' + input;
@@ -1037,7 +1112,7 @@ server = server.replace(
     throw new Error('ไม่สามารถอ่านลิงก์ TikTok ได้ กรุณาใช้ลิงก์แชร์ LIVE หรือ @username');
   }
   return input.replace(/^@/, '').split(/[/?#]/)[0].trim();
-}`
+}\`
 );
 server = server.replace(
   'const roomState = await connection.connect();',
