@@ -964,33 +964,14 @@ server = server.replace(
   if (autoRoomId) console.log('[TikTok Room ID] Resolved room ' + autoRoomId + ' for @' + cleanUser);`
 );
 server = server.replace(
-  /async function resolveTikTokUsername\\(rawInput\\) \\{[\\s\\S]*?\\n\\}/(rawInput) {
-  let input = String(rawInput || '').trim();
-  if (!input) {
-    throw new Error('Vui lòng nhập @username hoặc link TikTok Live cần kết nối');
-  }
-  if (input.startsWith('http://') || input.startsWith('https://') || input.includes('tiktok.com/')) {
-    const urlToFetch = input.startsWith('http') ? input : 'https://' + input;
-    const directMatch = urlToFetch.match(/tiktok\\.com\\/@([^/?#]+)/i);
-    if (directMatch && directMatch[1]) return directMatch[1];
-    try {
-      const resp = await fetch(urlToFetch, { redirect: 'follow' });
-      const finalUrl = resp.url || '';
-      const resolvedMatch = finalUrl.match(/tiktok\\.com\\/@([^/?#]+)/i);
-      if (resolvedMatch && resolvedMatch[1]) return resolvedMatch[1];
-    } catch (e) {
-      console.warn('[TikTok URL Resolve Warning]', e.message);
-    }
-  }
-  return input.replace(/^@/, '').split(/[/?#]/)[0].trim();
-}`,
+  /async function resolveTikTokUsername\(rawInput\) \{[\s\S]*?\n\}/,
   `async function resolveTikTokUsername(rawInput) {
   const input = String(rawInput || '').trim();
   if (!input) throw new Error('กรุณากรอก @username หรือลิงก์ TikTok LIVE');
-  if (/^\\\\d{8,}$/.test(input)) return 'room_' + input;
-  if (/^https?:\\\\/\\\\//i.test(input) || /(?:^|\\\\.)tiktok\\\\.com\\\\//i.test(input)) {
-    const urlToFetch = /^https?:\\\\/\\\\//i.test(input) ? input : 'https://' + input;
-    const directRoom = urlToFetch.match(/\\\\/(?:live|room)\\\\/(\\\\d{8,})(?:[/?#]|$)/i);
+  if (/^\\d{8,}$/.test(input)) return 'room_' + input;
+  if (/^https?:\\/\\//i.test(input) || /(?:^|\\.)tiktok\\.com\\//i.test(input)) {
+    const urlToFetch = /^https?:\\/\\//i.test(input) ? input : 'https://' + input;
+    const directRoom = urlToFetch.match(/\\/(?:live|room)\\/(\\d{8,})(?:[/?#]|$)/i);
     if (directRoom) return 'room_' + directRoom[1];
     try {
       const resp = await fetch(urlToFetch, {
@@ -999,9 +980,9 @@ server = server.replace(
         headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36' }
       });
       const finalUrl = resp.url || urlToFetch;
-      const userMatch = finalUrl.match(/tiktok\\\\.com\\\\/@([^/?#]+)/i);
+      const userMatch = finalUrl.match(/tiktok\\.com\\/@([^/?#]+)/i);
       if (userMatch?.[1]) return userMatch[1];
-      const roomMatch = finalUrl.match(/\\\\/(?:live|room)\\\\/(\\\\d{8,})(?:[/?#]|$)/i);
+      const roomMatch = finalUrl.match(/\\/(?:live|room)\\/(\\d{8,})(?:[/?#]|$)/i);
       if (roomMatch) return 'room_' + roomMatch[1];
     } catch (err) {
       console.warn('[TikTok URL Resolve Warning]', err?.message || String(err));
