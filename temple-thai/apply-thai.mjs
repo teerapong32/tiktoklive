@@ -944,8 +944,8 @@ write('public/css/live.css', css);
 
 let server = read('server.js');
 server = server.replace(
-  \`async function connectTikTokLive(usernameOrUrl) {\`,
-  \`async function resolveTikTokRoomId(rawInput, username) {
+  `async function connectTikTokLive(usernameOrUrl) {`,
+  `async function resolveTikTokRoomId(rawInput, username) {
   const input = String(rawInput || '').trim();
   if (/^\\d{8,}$/.test(input)) return input;
   const cleanUser = String(username || input.replace(/^@/, '').split(/[/?#]/)[0]).trim();
@@ -1071,23 +1071,23 @@ server = server.replace(
   return null;
 }
 
-async function connectTikTokLive(usernameOrUrl) {\`
+async function connectTikTokLive(usernameOrUrl) {`
 );
 server = server.replace(
-  \`async function connectTikTokLive(usernameOrUrl) {
-  const cleanUser = await resolveTikTokUsername(usernameOrUrl);\`,
-  \`async function connectTikTokLive(usernameOrUrl, roomIdOverride = '') {
+  `async function connectTikTokLive(usernameOrUrl) {
+  const cleanUser = await resolveTikTokUsername(usernameOrUrl);`,
+  `async function connectTikTokLive(usernameOrUrl, roomIdOverride = '') {
   const directRoomId = String(roomIdOverride || '').trim();
   if (directRoomId && !/^\\d+$/.test(directRoomId)) throw new Error('Room ID ต้องเป็นตัวเลขเท่านั้น');
   const autoRoomId = directRoomId || await resolveTikTokRoomId(usernameOrUrl, '');
   const cleanUser = autoRoomId
     ? (String(usernameOrUrl || '').trim().replace(/^@/, '').split(/[/?#]/)[0] || 'room_' + autoRoomId)
     : await resolveTikTokUsername(usernameOrUrl);
-  if (autoRoomId) console.log('[TikTok Room ID] Automatically resolved room ' + autoRoomId + ' for ' + cleanUser);\`
+  if (autoRoomId) console.log('[TikTok Room ID] Automatically resolved room ' + autoRoomId + ' for ' + cleanUser);`
 );
 server = server.replace(
   /async function resolveTikTokUsername\\(rawInput\\) \\{[\\s\\S]*?\\n\\}/,
-  String.raw\`async function resolveTikTokUsername(rawInput) {
+  `async function resolveTikTokUsername(rawInput) {
   const input = String(rawInput || '').trim();
   if (!input) throw new Error('กรุณากรอก @username หรือลิงก์ TikTok LIVE');
   if (/^\\d{8,}$/.test(input)) return 'room_' + input;
@@ -1112,7 +1112,7 @@ server = server.replace(
     throw new Error('ไม่สามารถอ่านลิงก์ TikTok ได้ กรุณาใช้ลิงก์แชร์ LIVE หรือ @username');
   }
   return input.replace(/^@/, '').split(/[/?#]/)[0].trim();
-}\`
+}`
 );
 server = server.replace(
   'const roomState = await connection.connect();',
