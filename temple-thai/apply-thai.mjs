@@ -1086,7 +1086,7 @@ server = server.replace(
   if (autoRoomId) console.log('[TikTok Room ID] Automatically resolved room ' + autoRoomId + ' for ' + cleanUser);`
 );
 server = server.replace(
-  /async function resolveTikTokUsername\\(rawInput\\) \\{[\\s\\S]*?\\n\\}/,
+  /async function resolveTikTokUsername\(rawInput\) \{[\s\S]*?\n\}/,
   `async function resolveTikTokUsername(rawInput) {
   const input = String(rawInput || '').trim();
   if (!input) throw new Error('กรุณากรอก @username หรือลิงก์ TikTok LIVE');
