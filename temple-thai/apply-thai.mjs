@@ -864,7 +864,7 @@ for (const file of filesToTranslate) {
   for (const [from, to] of translations) html = html.replaceAll(from, to);
   if (file === 'public/admin.html') {
     html = html.replace(
-      '<input type="text" id="ttUser" placeholder="Nhập @username TikTok đang phát Live..." />',
+      '<input type="text" id="ttUser" placeholder="กรอกชื่อบัญชี TikTok ที่กำลัง LIVE" />',
       '<input type="text" id="ttUser" placeholder="กรอก @username หรือลิงก์แชร์ TikTok LIVE..." />'
     );
     html = html.replace(
