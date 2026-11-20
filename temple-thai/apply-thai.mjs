@@ -880,6 +880,51 @@ for (const file of filesToTranslate) {
       "const username = document.getElementById('ttUser').value.trim();\n      const roomId = document.getElementById('ttRoomId').value.trim();\n      sendRpc('live.connect', { username, roomId });"
     );
   }
+
+    html = html.replace(
+      /document\.getElementById\('btnConn'\)\.onclick\s*=\s*\(\)\s*=>\s*\{[\s\S]*?\n\s*\};/,
+      \`document.getElementById('btnConn').onclick = async () => {
+      const button = document.getElementById('btnConn');
+      const output = document.getElementById('rpcOutput');
+      const username = document.getElementById('ttUser').value.trim();
+      const roomInput = document.getElementById('ttRoomId');
+      const roomId = roomInput ? roomInput.value.trim() : '';
+      if (!username && !roomId) {
+        output.textContent = 'กรุณากรอก @Username หรือลิงก์แชร์ TikTok LIVE ก่อนเชื่อมต่อ';
+        document.getElementById('ttUser').focus();
+        return;
+      }
+      button.disabled = true;
+      const oldLabel = button.textContent;
+      button.textContent = 'กำลังเชื่อมต่อ TikTok LIVE...';
+      output.textContent = 'กำลังส่งคำสั่งเชื่อมต่อ กรุณารอสักครู่...';
+      try {
+        const result = await sendRpc('live.connect', { username, roomId });
+        output.textContent = JSON.stringify(result, null, 2);
+      } catch (error) {
+        output.textContent = 'เชื่อมต่อไม่สำเร็จ: ' + (error?.message || String(error));
+      } finally {
+        button.disabled = false;
+        button.textContent = oldLabel;
+      }
+    };\`
+    );
+    html = html.replace(
+      \`const res = await fetch('/rpc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();\`,
+      \`const res = await fetch('/rpc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status + ' จาก /rpc');
+      const data = await res.json();\`
+    );
+
   if (file === 'public/index.html') {
     html = html.replace(
       'value="Cầu cho gia đình bình an, tài lộc hanh thông, vạn sự như ý"',
