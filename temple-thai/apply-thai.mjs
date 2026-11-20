@@ -997,7 +997,7 @@ server = server.replace(
   };
 
   const apiUrls = [
-    'https://www.tiktok.com/api-live/user/room/?uniqueId=' + encodeURIComponent(cleanUser) + '&sourceType=54',
+    'https://www.tiktok.com/api-live/user/room/?uniqueId=' + encodeURIComponent(cleanUser) + '&sourceType=54&staleTime=600000&aid=1988',
     'https://m.tiktok.com/api-live/user/room/?uniqueId=' + encodeURIComponent(cleanUser) + '&sourceType=54'
   ];
   for (const apiUrl of apiUrls) {
