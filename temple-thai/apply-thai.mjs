@@ -964,7 +964,7 @@ server = server.replace(
   if (autoRoomId) console.log('[TikTok Room ID] Resolved room ' + autoRoomId + ' for @' + cleanUser);`
 );
 server = server.replace(
-  `async function resolveTikTokUsername(rawInput) {
+  /async function resolveTikTokUsername\\(rawInput\\) \\{[\\s\\S]*?\\n\\}/(rawInput) {
   let input = String(rawInput || '').trim();
   if (!input) {
     throw new Error('Vui lòng nhập @username hoặc link TikTok Live cần kết nối');
