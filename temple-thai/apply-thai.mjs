@@ -883,7 +883,7 @@ for (const file of filesToTranslate) {
 
     html = html.replace(
       /document\.getElementById\('btnConn'\)\.onclick\s*=\s*\(\)\s*=>\s*\{[\s\S]*?\n\s*\};/,
-      \`document.getElementById('btnConn').onclick = async () => {
+      `document.getElementById('btnConn').onclick = async () => {
       const button = document.getElementById('btnConn');
       const output = document.getElementById('rpcOutput');
       const username = document.getElementById('ttUser').value.trim();
@@ -907,22 +907,22 @@ for (const file of filesToTranslate) {
         button.disabled = false;
         button.textContent = oldLabel;
       }
-    };\`
+    };`
     );
     html = html.replace(
-      \`const res = await fetch('/rpc', {
+      `const res = await fetch('/rpc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
-      const data = await res.json();\`,
-      \`const res = await fetch('/rpc', {
+      const data = await res.json();`,
+      `const res = await fetch('/rpc', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error('HTTP ' + res.status + ' จาก /rpc');
-      const data = await res.json();\`
+      const data = await res.json();`
     );
 
   if (file === 'public/index.html') {
