@@ -964,7 +964,7 @@ server = server.replace(
   if (autoRoomId) console.log('[TikTok Room ID] Resolved room ' + autoRoomId + ' for @' + cleanUser);`
 );
 server = server.replace(
-  \`async function resolveTikTokUsername(rawInput) {
+  `async function resolveTikTokUsername(rawInput) {
   let input = String(rawInput || '').trim();
   if (!input) {
     throw new Error('Vui lòng nhập @username hoặc link TikTok Live cần kết nối');
@@ -983,8 +983,8 @@ server = server.replace(
     }
   }
   return input.replace(/^@/, '').split(/[/?#]/)[0].trim();
-}\`,
-  \`async function resolveTikTokUsername(rawInput) {
+}`,
+  `async function resolveTikTokUsername(rawInput) {
   const input = String(rawInput || '').trim();
   if (!input) throw new Error('กรุณากรอก @username หรือลิงก์ TikTok LIVE');
   if (/^\\\\d{8,}$/.test(input)) return 'room_' + input;
@@ -1009,7 +1009,7 @@ server = server.replace(
     throw new Error('ไม่สามารถอ่านลิงก์ TikTok ได้ กรุณาใช้ลิงก์แชร์ LIVE หรือ @username');
   }
   return input.replace(/^@/, '').split(/[/?#]/)[0].trim();
-}\`
+}`
 );
 server = server.replace(
   'const roomState = await connection.connect();',
