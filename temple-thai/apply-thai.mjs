@@ -1325,40 +1325,44 @@ if (fs.existsSync(adminFile)) {
 const liveFile = path.join(root, 'public', 'index.html');
 if (fs.existsSync(liveFile)) {
   let live = fs.readFileSync(liveFile, 'utf8');
-  const liveMusic = String.raw`
-  <div id="templeBgMusicDock" style="position:fixed;right:12px;bottom:12px;width:220px;z-index:99999;background:#160805;border:1px solid #d5a64a;border-radius:10px;padding:4px;color:#fff;font:12px sans-serif">
-    <div id="templeBgMusicPlayer" style="width:210px;height:200px"></div>
-    <div id="templeBgMusicStatus" style="padding:3px 4px">กำลังเตรียมเสียงพื้นหลัง...</div>
+  const liveMusic = String.raw\`
+  <div id="templeBgMusicDock" aria-hidden="true" style="position:fixed;left:-10000px;top:0;width:200px;height:200px;overflow:hidden;pointer-events:none;z-index:-1">
+    <div id="templeBgMusicPlayer" style="width:200px;height:200px"></div>
   </div>
+  <button id="templeBgMusicUnlock" type="button" style="display:none;position:fixed;right:12px;top:12px;z-index:999999;border:0;border-radius:22px;padding:10px 15px;background:#8b5e18;color:#fff;font:600 14px sans-serif;box-shadow:0 2px 10px #0008">▶ เปิดเสียงพื้นหลัง</button>
   <script>
   (() => {
     const DEFAULT_URL = 'https://www.youtube.com/watch?v=hgUY8UWwPjc';
     let player = null, videoId = '', enabled = true, volume = 35;
-    const status = (message) => { const el = document.getElementById('templeBgMusicStatus'); if (el) el.textContent = message; };
-    const parseId = (url) => { try { const u = new URL(url); return u.hostname.includes('youtu.be') ? u.pathname.slice(1, 12) : (u.searchParams.get('v') || u.pathname.match(/\\/(?:embed|shorts)\\/([A-Za-z0-9_-]{11})/)?.[1] || ''); } catch (_) { return ''; } };
+    const unlock = document.getElementById('templeBgMusicUnlock');
+    const parseId = (url) => { try { const u = new URL(url); return u.hostname.includes('youtu.be') ? u.pathname.slice(1, 12) : (u.searchParams.get('v') || u.pathname.match(/\\\\/(?:embed|shorts)\\\\/([A-Za-z0-9_-]{11})/)?.[1] || ''); } catch (_) { return ''; } };
     async function getConfig() { try { const response = await fetch('/api/background-music', { cache: 'no-store' }); if (response.ok) return await response.json(); } catch (_) {} return { url: DEFAULT_URL, enabled: true, volume: 35 }; }
     function applyConfig(config) {
       const nextId = parseId(config.url || DEFAULT_URL);
       enabled = config.enabled !== false;
       volume = Math.max(0, Math.min(100, Number(config.volume ?? 35)));
-      const dock = document.getElementById('templeBgMusicDock');
-      if (!enabled) { if (player && player.pauseVideo) player.pauseVideo(); if (dock) dock.style.display = 'none'; return; }
-      if (dock) dock.style.display = 'block';
-      if (!nextId) { status('ลิงก์ YouTube ไม่ถูกต้อง'); return; }
+      if (!enabled) { if (player?.pauseVideo) player.pauseVideo(); unlock.style.display = 'none'; return; }
+      if (!nextId) return;
       if (player && nextId !== videoId && player.loadVideoById) { videoId = nextId; player.loadVideoById({ videoId, startSeconds: 0 }); }
-      if (player && player.setVolume) player.setVolume(volume);
+      if (player?.setVolume) player.setVolume(volume);
+      if (player?.playVideo) player.playVideo();
     }
+    unlock.addEventListener('click', () => {
+      if (player && enabled) { player.unMute(); player.setVolume(volume); player.playVideo(); unlock.style.display = 'none'; }
+    });
     window.onYouTubeIframeAPIReady = async function () {
       const config = await getConfig();
-      applyConfig(config);
+      enabled = config.enabled !== false;
+      volume = Math.max(0, Math.min(100, Number(config.volume ?? 35)));
       videoId = parseId(config.url || DEFAULT_URL) || 'hgUY8UWwPjc';
       player = new YT.Player('templeBgMusicPlayer', {
-        width: '210', height: '200', videoId,
-        playerVars: { autoplay: config.enabled === false ? 0 : 1, controls: 1, loop: 1, playlist: videoId, playsinline: 1, rel: 0, origin: location.origin },
+        width: '200', height: '200', videoId,
+        playerVars: { autoplay: enabled ? 1 : 0, controls: 0, loop: 1, playlist: videoId, playsinline: 1, rel: 0, origin: location.origin },
         events: {
-          onReady: (event) => { event.target.setVolume(volume); if (enabled) event.target.playVideo(); status('เสียงพื้นหลัง YouTube'); },
+          onReady: (event) => { event.target.setVolume(volume); if (enabled) event.target.playVideo(); },
           onStateChange: (event) => { if (event.data === YT.PlayerState.ENDED && enabled) event.target.playVideo(); },
-          onAutoplayBlocked: () => status('เบราว์เซอร์บล็อกเสียงอัตโนมัติ กรุณากดเล่นบนเครื่องเล่นหนึ่งครั้ง')
+          onAutoplayBlocked: () => { if (enabled) unlock.style.display = 'block'; },
+          onError: () => { unlock.textContent = 'เสียง YouTube เล่นไม่ได้'; unlock.style.display = 'block'; }
         }
       });
       setInterval(async () => { const latest = await getConfig(); applyConfig(latest); }, 8000);
@@ -1368,7 +1372,8 @@ if (fs.existsSync(liveFile)) {
     document.head.appendChild(tag);
   })();
   </script>
-`;
+\`;
+
   if (!live.includes('id="templeBgMusicDock"') && live.includes('</body>')) live = live.replace('</body>', liveMusic + '\n</body>');
   fs.writeFileSync(liveFile, live);
 }
