@@ -842,6 +842,17 @@ const GREETING_TOKEN_TRANSLATIONS = [
 ];
 translations.push(...GREETING_TOKEN_TRANSLATIONS);
 
+translations.push(
+  ['Đã vào Chánh Điện lễ Phật', 'เข้าร่วม LIVE และเข้าสู่พระวิหารแล้ว'],
+  ['Thí Chủ', 'ผู้ร่วมทำบุญ'],
+  ['Không tìm thấy @username hợp lệ từ dữ liệu nhập vào', 'ไม่พบชื่อบัญชี TikTok ที่ถูกต้องจากข้อมูลที่กรอก'],
+  ['Vui lòng nhập @username hoặc link TikTok Live cần kết nối', 'กรุณากรอก @username หรือลิงก์ TikTok LIVE ที่ต้องการเชื่อมต่อ'],
+  ['Không thể kết nối phòng Live (kiểm tra tài khoản đang phát Live chưa)', 'ไม่สามารถเชื่อมต่อห้อง LIVE ได้ กรุณาตรวจสอบว่าบัญชีกำลังถ่ายทอดสดอยู่หรือไม่'],
+  ['Thiếu nội dung text cần đọc', 'ไม่มีข้อความสำหรับอ่านออกเสียง'],
+  ['Không tìm thấy phương thức JSON-RPC: ', 'ไม่พบคำสั่ง JSON-RPC: '],
+  ['Đã kết nối', 'เชื่อมต่อแล้ว'], ['Đã ngắt kết nối', 'ยกเลิกการเชื่อมต่อแล้ว'],
+  ['Đang kết nối', 'กำลังเชื่อมต่อ'], ['Đang tải', 'กำลังโหลด'], ['Lỗi kết nối', 'ข้อผิดพลาดในการเชื่อมต่อ']
+);
 translations.sort((a, b) => b[0].length - a[0].length);
 
 function collectJsFiles(dir) {
@@ -1134,6 +1145,34 @@ server = server.replace(
 );
 server = server.replace(
   'const commentCooldownMap = new Map();',
+  'const memberGreetingCooldownMap = new Map();\n  const MEMBER_GREETING_COOLDOWN_MS = 180000;\n  const commentCooldownMap = new Map();'
+);
+server = server.replace(
+  "recordDevotee(user, uniqueId, avatar, 1, 0, 0, 'Đã vào Chánh Điện lễ Phật');",
+  [
+    "const devotee = recordDevotee(user, uniqueId, avatar, 1, 0, 0, 'เข้าร่วม LIVE และเข้าสู่พระวิหารแล้ว');",
+    "const memberKey = String(uniqueId || user || '').trim().toLowerCase();",
+    "const now = Date.now();",
+    "const lastGreeting = memberGreetingCooldownMap.get(memberKey) || 0;",
+    "if (memberKey && now - lastGreeting >= MEMBER_GREETING_COOLDOWN_MS) {",
+    "  memberGreetingCooldownMap.set(memberKey, now);",
+    "  if (memberGreetingCooldownMap.size > 2000) {",
+    "    for (const [key, timestamp] of memberGreetingCooldownMap) {",
+    "      if (now - timestamp > MEMBER_GREETING_COOLDOWN_MS) memberGreetingCooldownMap.delete(key);",
+    "    }",
+    "  }",
+    "  const welcomeText = 'ขอต้อนรับ คุณ' + devotee.name + ' เข้าสู่ไลฟ์ ขอให้ได้รับความสุขและความเป็นสิริมงคลนะครับ';",
+    "  zeroTts.synthesize(welcomeText, 'th-TH-PremwadeeNeural').then((audio) => {",
+    "    if (audio?.ok && audio.url) {",
+    "      broadcastNotification('tts.play', { text: welcomeText, voice: audio.voice || 'th-TH-PremwadeeNeural', url: audio.url });",
+    "      console.log('[TikTok Member Welcome] อ่านชื่อผู้เข้าร่วมแล้ว: ' + devotee.name);",
+    "    } else {",
+    "      console.warn('[TikTok Member Welcome] สร้างเสียงต้อนรับไม่สำเร็จ:', audio?.error || 'TTS not ready');",
+    "    }",
+    "  }).catch((error) => console.warn('[TikTok Member Welcome]', error?.message || String(error)));",
+    "}"
+  ].join('\n')
+);
   `function formatTikTokError(err) {
     const summarize = (item) => ({
       name: item?.name || 'Error',
