@@ -1032,26 +1032,30 @@ server = server.replace(
       const urlRoom = finalUrl.match(/\\/(?:live|room)\\/(\\d{8,})(?:[/?#]|$)/i);
       if (urlRoom) return urlRoom[1];
 
-      const scriptPatterns = [
-        /<script[^>]*\\bid=["']SIGI_STATE["'][^>]*>([\\s\\S]*?)<\\/script>/i,
-        /<script[^>]*\\bid=["']__UNIVERSAL_DATA_FOR_REHYDRATION__["'][^>]*>([\\s\\S]*?)<\\/script>/i
-      ];
-      for (const pattern of scriptPatterns) {
-        const match = html.match(pattern);
-        if (match) {
-          try {
-            const parsed = JSON.parse(match[1]);
-            const liveUser = parsed?.LiveRoom?.liveRoomUserInfo?.user;
-            const directRoom = liveUser?.roomId;
-            const room = directRoom != null && /^\\d{8,}$/.test(String(directRoom))
-              ? String(directRoom)
-              : extractRoom(parsed);
-            if (liveUser) console.log('[TikTok LIVE page data]', JSON.stringify({ uniqueId: liveUser.uniqueId || '', status: liveUser.status ?? null, roomIdFound: Boolean(room) }));
-            if (room) {
-              console.log('[TikTok Room ID] Resolved from embedded LIVE page data: ' + room);
-              return room;
-            }
-          } catch (_) {}
+      for (const scriptId of ['SIGI_STATE', '__UNIVERSAL_DATA_FOR_REHYDRATION__']) {
+        const doubleAttr = 'id="' + scriptId + '"';
+        const singleAttr = "id='" + scriptId + "'";
+        const idAt = Math.max(html.indexOf(doubleAttr), html.indexOf(singleAttr));
+        if (idAt < 0) continue;
+        const tagStart = html.lastIndexOf('<script', idAt);
+        const tagEnd = html.indexOf('>', idAt);
+        const scriptEnd = html.indexOf('</script>', tagEnd);
+        if (tagStart < 0 || tagEnd < 0 || scriptEnd < 0) continue;
+        const scriptText = html.slice(tagEnd + 1, scriptEnd);
+        try {
+          const parsed = JSON.parse(scriptText);
+          const liveUser = parsed?.LiveRoom?.liveRoomUserInfo?.user;
+          const directRoom = liveUser?.roomId;
+          const room = directRoom != null && /^\\d{8,}$/.test(String(directRoom))
+            ? String(directRoom)
+            : extractRoom(parsed);
+          console.log('[TikTok LIVE page data]', JSON.stringify({ scriptId, liveRoomFound: Boolean(parsed?.LiveRoom), liveUserFound: Boolean(liveUser), uniqueId: liveUser?.uniqueId || '', status: liveUser?.status ?? null, roomIdFound: Boolean(room) }));
+          if (room) {
+            console.log('[TikTok Room ID] Resolved from embedded LIVE page data: ' + room);
+            return room;
+          }
+        } catch (parseError) {
+          console.warn('[TikTok LIVE page JSON parse]', scriptId, parseError?.message || String(parseError));
         }
       }
 
